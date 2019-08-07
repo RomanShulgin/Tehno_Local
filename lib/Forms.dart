@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'HTTPExchange.dart';
 import 'styledwidgets.dart';
-import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'globals.dart' as globals;
 
@@ -10,14 +11,18 @@ class IdentForm extends StatefulWidget {
   createState() => new IdentFormState();
 }
 
+
+
 class IdentFormState extends State<IdentForm> {
 
   String user;
   String password;
   final txt1 = TextEditingController();
   final txt2 = TextEditingController();
+  bool isloading = true;
 
   var name = 'Авторизуйтесь';
+  bool storepass=false;
 
   Future<void> greeting (BuildContext context) {
     return showDialog<void>(
@@ -53,13 +58,27 @@ class IdentFormState extends State<IdentForm> {
     print('User found '+user);
     if(txt1.text.isEmpty){
       txt1.text=user;
+    };
+    password = (prefs.getString('password') ?? "");
+    print('password found '+password);
+    if(password.isNotEmpty){
+      storepass=true;
+    };
+    if(txt2.text.isEmpty){
+      txt2.text=password;
     }
+    print(storepass);
+    isloading=false;
+    setState(() {
+
+    });
   }
 
   storeUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     print('User stored '+globals.user);
     prefs.setString('user',globals.user);
+    if (storepass) {prefs.setString('password',globals.password); };
   }
 
 
@@ -82,8 +101,11 @@ class IdentFormState extends State<IdentForm> {
       if (globals.authOK){
         globals.password=post.password;
         globals.user=post.user;
+        globals.curdate=new DateTime.now();
+        globals.datefrom=new DateTime(globals.curdate.year,globals.curdate.month,1);
+        globals.dateto=globals.curdate;
         storeUser();
-        Navigator.pushNamed(context, '/second');
+        Navigator.pushNamed(context, '/Home');
       }
       else {
         globals.password='';
@@ -93,98 +115,43 @@ class IdentFormState extends State<IdentForm> {
     });
   }
 
+
   Widget build(BuildContext context) {
-    loadUser();
+    if(isloading){
+    loadUser();};
+
     return Scaffold(
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(title: Text('Авторизация')),
         body:
         Center(child:
-          ContP(
+
               ListView(
                   children: [
-                    Text('Пользователь'),
-                    TextFormField(controller: txt1),
-                    Divider(),
-                    Text('Пароль'),
-                    TextFormField(controller: txt2),
+                    Group(TextFormField(controller: txt1),'Пользователь'),
+                    //Divider(),
+                    Group(TextFormField(controller: txt2, obscureText: true ,),'Пароль'),
+                    Row(children: <Widget>[Checkbox(value: storepass, onChanged: (value) {
+                         setState(() {
+                           storepass = value;
+                                     });
+                           }),
+                    Text(' сохранять пароль')],),
                     RButton('Войти', (){getData(''); }),
                     futureText(),
+                    LGroup(
+                        Column(children: <Widget>[
+                          Row(children: <Widget>[Icon(Icons.phone),Expanded(child: LightButton('+7 (495) 308-00-61', () {launch("tel:"+'+7 (495) 308-00-61');}) ),]),
+                          Row(children: <Widget>[Icon(Icons.email),Expanded(child: LightButton('sale@tehno-parts.ru', () {launch("mailto:"+'sale@tehno-parts.ru');}) ),]),
+                          //Row(children: <Widget>[Icon(Icons.location_on),Expanded(child: Center(child: LightButton("Как к нам проехать (Я.Карты)", () {launch("yandexmaps://build_route_on_map?lat_to=55.53685594035359&lon_to=37.575195730163564" /*"yandexnavi://build_route_on_map?lat_to=55.53685594035359&amp;lon_to=37.575195730163564"*/);}) )),]),
+                        ],)
+                        , 'Для регистрации просьба воспользоваться следующими контактами:'),
                   ])
-          ),
         )
     );
 
   }
 }
 
-class HomeScreenState extends State<HomeScreen> {
-
-  int inn;
-  String display;
-  final txt1= TextEditingController();
-
-  var name = 'Неопределено';
-
-  Widget futureText(){
-    return new FutureBuilder<String>(
-        builder: (context, snapshot) {
-          return new Text(name);
-        }
-    );
-  }
-
-  Future getData(input) async{
-    //var input;
-    var post=new Post1c();
-    post.metod="baseinfo";
-    post.input="";
-    await post.HttpGet();
-    setState(() {
-      name=post.text;
-
-    });
-  }
-
-  Widget build(BuildContext context) {
-    return
-          Column(children: <Widget>[
-          new Row(children: [
-            new Column(children: [
-              Text('Контрагент'),
-              Text('Тип цены'),
-              Text('Баланс', textDirection: TextDirection.ltr),
-            ],
-            ),
-            new Column(children: [
-              Text('Контрагент'),
-              Text('Тип цены'),
-              Text('Баланс'),
-            ]),
-            new Column(children: [
-              IconButton(
-                onPressed: () {getData('');},
-                icon: Icon(Icons.cached),
-                color: Colors.red),
-
-              Text('Тип цены'),
-              Text('Баланс'),
-            ]),
-          ],),
-          new Row(
-              children: [
-                futureText(),
-              ]
-          ),
-        ],);
-
-
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  @override
-  createState() => new HomeScreenState();
-}
 
 
