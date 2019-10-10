@@ -8,5 +8,6 @@ bool basketChanged=false;
 var screenSize;
 var datefrom, dateto, curdate, currentcatalog, currentIndex=0,store,storeSet=false;
 Map filters = new Map();
+var redrawBasketIcon=null;
 
 bool authOK=false;

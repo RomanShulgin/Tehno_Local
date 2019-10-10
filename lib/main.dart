@@ -83,6 +83,63 @@ class InfoScreen extends StatefulWidget{
   createState() => new InfoScreenState();
 }
 
+class basketIcon extends StatefulWidget{
+  @override
+  createState() => new basketIconState();
+}
+
+class basketIconState extends State<basketIcon>{
+  void redraw() {
+
+    setState(() {});
+  }
+  Widget build(BuildContext context) {
+    var basketcolor,amount;
+    globals.redrawBasketIcon=redraw;
+
+    amount=0;
+    basketcolor=Colors.black;
+    if (globals.basket.isNotEmpty)
+    {
+    for (var el in globals.basket) {
+      amount = amount + el['amount'];
+    };
+    if(amount>0)
+      basketcolor=Colors.green;
+    }
+
+    else
+      basketcolor=Colors.black;
+    /*print("В корзине "+globals.basket.last.toString());*/
+
+  if (amount>0){
+    print('корзина перерисовывается '+amount.toString());
+  return Stack(
+      alignment: Alignment.centerRight,
+      children:[
+  IconButton(
+    color: basketcolor,
+    icon: new Icon(Icons.shopping_cart),
+    onPressed: () {Navigator.pushNamed(context, '/Basket');},
+    ),
+  Positioned(child:Text(amount.toString()),right: 3.0,)
+  ]
+  );}
+  else{
+    return Stack(
+        alignment: Alignment.centerRight,
+        children:[
+          IconButton(
+            color: basketcolor,
+            icon: new Icon(Icons.shopping_cart),
+            onPressed: () {Navigator.pushNamed(context, '/Basket');},
+          ),
+        ]
+    );
+  }
+  }
+}
+
 
 class InfoScreenState extends State<InfoScreen>{
 
@@ -127,18 +184,35 @@ class InfoScreenState extends State<InfoScreen>{
 
   @override
   Widget build(BuildContext context) {
+    var basketcolor,amount;
     globals.screenSize=MediaQuery.of(context).size;
+    basketcolor=Colors.black;
+    if (globals.basket.isNotEmpty)
+      { amount=0;
+        for (var el in globals.basket) {
+          amount = amount + el['amount'];
+        };
+        if(amount>0)
+        basketcolor=Colors.green;
+      }
+
+    else
+      basketcolor=Colors.black;
+    /*print("В корзине "+globals.basket.last.toString());*/
     return WillPopScope(
       onWillPop: logoffDialog,
         child: Scaffold(
+          resizeToAvoidBottomInset: true,
       appBar: AppBar(
         leading: new Icon(Icons.menu),
         title: Text(globals.firm),
         actions: <Widget>[
-          new IconButton(
+          new basketIcon(),
+          /*new IconButton(
+            color: basketcolor,
             icon: new Icon(Icons.shopping_cart),
             onPressed: () {Navigator.pushNamed(context, '/Basket');},
-          ),
+          ),*/
           new IconButton(
             icon: new Icon(Icons.autorenew),
             onPressed: () {
