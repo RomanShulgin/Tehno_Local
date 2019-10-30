@@ -4,6 +4,7 @@ import 'styledwidgets.dart';
 import 'dart:typed_data';
 import 'Basket.dart';
 import 'globals.dart' as globals;
+import 'main.dart';
 
 
 
@@ -47,11 +48,7 @@ void dialogGoodsCard(code,nomType,context,[fixparams,name,redraw]) {
               if(redraw!=null){
                 redraw();
               }
-              if(globals.redrawBasketIcon!=null){
-                globals.redrawBasketIcon();
-                print('перерисовываем корзинку');
 
-              }
 
               Navigator.of(context).pop();
             },
