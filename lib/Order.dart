@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tehnoparts/Alarms.dart';
 import 'HTTPExchange.dart';
 import 'styledwidgets.dart';
 import 'package:date_format/date_format.dart';
 import 'Goods.dart';
+import 'Payment.dart';
 
 import 'globals.dart' as globals;
 
@@ -140,6 +142,27 @@ class OrderState extends State<Order> {
     setState((){});
   }
 
+  void Pay(struct){
+    if(getParam(json,"Оплачен")=='Оплачен'){
+      var buttons = new  List<Widget>();
+      buttons.add(FlatButton(
+          child: Text('Оплатить'),
+          onPressed: ()  {Navigator.push(context, MaterialPageRoute(
+              builder: (context) => Payment(struct)));},
+          ));
+      buttons.add(FlatButton(
+        child: Text('Возврат'),
+        onPressed: () {
+          Navigator.of(context).pop();
+        }));
+      PopUpDialog('Платеж', "Данный документ уже оплачен", buttons, context);
+    }
+    else{
+      Navigator.push(context, MaterialPageRoute(
+          builder: (context) => Payment(struct)));
+    }
+  }
+
   Widget FixDraft(struct,json){
   if(struct['type']=='KP'&&getParam(json,"Проведен")=='Нет'){
     return RButton('Сделать заказ',(){
@@ -197,13 +220,22 @@ class OrderState extends State<Order> {
           appBar: AppBar(title: Text('Заказ...')),
           body:
         Column(children: <Widget>[LinearProgressIndicator(),
-        RButton('Назад', (){Navigator.of(context).pop(); })
+        Row(
+          children: <Widget>[
+
+            RButton('Назад', (){Navigator.of(context).pop(); }),
+          ],
+        )
         ],
         )
 
     );
     }
     else {
+      Map payStruct = new Map();
+      payStruct['Sum']=refString(getParam(json,"СуммаДокумента"));
+      payStruct['Order']=getParam(json,"Ссылка");
+
       return Scaffold(
           appBar: AppBar(title: Text(getParam(json,"Ссылка"))),
           body: ListView(children:
@@ -228,9 +260,14 @@ class OrderState extends State<Order> {
           ),
           Group(Text(getParam(json,"Комментарий")),'Комментарий'),
           FixDraft(struct,json),
-            RButton('Назад', () {
-              Navigator.of(context).pop();
-            })
+            Row(
+              children: <Widget>[
+                RButton("Оплатить",() {Pay(payStruct);}),
+                RButton('Назад', () {
+                  Navigator.of(context).pop();
+                }),
+              ],
+            )
           ],
           ));
 
