@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_store/flutter_cache_store.dart';
 import 'HTTPExchange.dart';
 import 'globals.dart' as globals;
 import 'styledwidgets.dart';
@@ -61,6 +62,7 @@ class Msg extends StatelessWidget {
     );
   }
 }
+
 
 
 class ChatState extends State<Chat> {
@@ -183,12 +185,22 @@ class ChatState extends State<Chat> {
 
   void initState(){
     SchedulerBinding.instance.addPostFrameCallback((_) => controller.animateTo(controller.position.maxScrollExtent, duration: Duration(seconds: 1),curve: Curves.ease));
+    Timer.periodic(Duration(seconds: 5),(timer){MissedMessages();});
+  }
 
+  Future MissedMessages()async{
+    if(globals.missedMessages>0){
+      showChat();
+      setState(() {});
+      //redraw();
+    }
   }
 
   Widget build(BuildContext context) {
     //print('dialog');
     globals.tabredraw[3]=redraw;
+    //Timer(Duration(seconds: 10),MissedMessages);
+
     if (isloading) {
       showChat();
       return LinearProgressIndicator();

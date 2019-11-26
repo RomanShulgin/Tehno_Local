@@ -5,6 +5,7 @@ import 'package:flutter_cache_store/flutter_cache_store.dart';
 import 'Goods.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'main.dart';
 
 import 'globals.dart' as globals;
 
@@ -270,10 +271,23 @@ class itemGroup extends StatefulWidget {
 class itemGroupState extends State<itemGroup> {
   var data;
 
+  void redraw()
+  {
+    var statescaffold = context.ancestorStateOfType(TypeMatcher<InfoScreenState>());
+    if(statescaffold!=null){
+      statescaffold.setState(() {});
+      print('перерисовываем корзинку');
+    }
+  }
+
   Widget build(BuildContext context) {
     data = widget.data;
     var items = data['Элементы'];
     var title = "------------------------";
+
+
+
+
     List itemList = new List<Widget>();
     String user = globals.user;
     String password = globals.password;
@@ -282,7 +296,7 @@ class itemGroupState extends State<itemGroup> {
     var imageaddr =
         'http://46.34.155.26/dist/hs/GetBasicInfo/$user/$password/groupicon/?name=$src';
     if (src != "Остальное") title = src;
-    for (var item in items) itemList.add(nomItem(item));
+    for (var item in items) itemList.add(nomItem(item,redraw));
     return ExpansionTile(
       title: Text(title),
       leading: Image.network(imageaddr),

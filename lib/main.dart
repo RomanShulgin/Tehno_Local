@@ -12,6 +12,7 @@ import 'Order.dart';
 import 'Catalog.dart';
 import 'Basket.dart';
 import 'Chat.dart';
+import 'HTTPExchange.dart';
 
 import 'globals.dart' as globals;
 
@@ -39,7 +40,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     globals.currentcatalog=globals.baseCatalog;//основа
-
+    //Timer.periodic(Duration(seconds: 5),(timer){InfoScreenState.MissedMessages;});
+    //globals.basketKey=new GlobalKey();
     getStoreInstance();
    // globals.store=store;
     return MaterialApp(
@@ -67,6 +69,7 @@ class MyApp extends StatelessWidget {
 }
 
 
+
 class MyBody extends StatelessWidget {
 
   MyBody();
@@ -78,23 +81,20 @@ class MyBody extends StatelessWidget {
   }
 }
 
-class InfoScreen extends StatefulWidget{
-  @override
-  createState() => new InfoScreenState();
-}
 
 class basketIcon extends StatefulWidget{
+  /*basketIcon({Key key}): super(key: key);*/
   @override
   createState() => new basketIconState();
 }
 
 class basketIconState extends State<basketIcon>{
-  void redraw() {
 
-    setState(() {});
-  }
   Widget build(BuildContext context) {
     var basketcolor,amount;
+    void redraw() {
+      setState(() {amount=0;});
+    }
     globals.redrawBasketIcon=redraw;
 
     amount=0;
@@ -140,17 +140,45 @@ class basketIconState extends State<basketIcon>{
   }
 }
 
+class InfoScreen extends StatefulWidget{
+  @override
+  createState() => new InfoScreenState();
+}
 
 class InfoScreenState extends State<InfoScreen>{
 
 
   List<Widget> tabs=[MyBody(),OrderList(globals.datefrom,globals.dateto),Catalog(),Chat()];
-
+  //Timer.periodic(Duration(seconds: 5),(timer){MissedMessages;});
   void onTabTapped(int index) {
     setState(() {
       globals.currentIndex = index;
     });
   }
+
+  @override
+  void initState() {
+    super.initState();
+    Timer.periodic(Duration(seconds: 15),(timer){MissedMessages();});
+  }
+
+  Future MissedMessages()async{
+    var post = new Post1c();
+
+    post.metod = "missedmessages";
+    post.input = '?messagesquantity=' + 100.toString();
+    await post.HttpGet();
+    int missedMessages=0;
+    missedMessages=getParam(post.text, 'КоличествоСообщений');
+    if(missedMessages!=globals.missedMessages){
+      globals.missedMessages=missedMessages;
+
+      setState(() {
+        //globals.currentIndex = index;
+      });
+    }
+  }
+
 
   Future<bool> logoffDialog(){
     if((globals.currentIndex==2)&&(globals.currentcatalog!= globals.baseCatalog)){
@@ -181,24 +209,23 @@ class InfoScreenState extends State<InfoScreen>{
       },
     );
   }
-
+  void GetMissedMessages(){
+    MissedMessages();
+  }
   @override
   Widget build(BuildContext context) {
-    var basketcolor,amount;
-    globals.screenSize=MediaQuery.of(context).size;
-    basketcolor=Colors.black;
-    if (globals.basket.isNotEmpty)
-      { amount=0;
-        for (var el in globals.basket) {
-          amount = amount + el['amount'];
-        };
-        if(amount>0)
-        basketcolor=Colors.green;
-      }
 
-    else
-      basketcolor=Colors.black;
-    /*print("В корзине "+globals.basket.last.toString());*/
+    void redraw() {
+      setState(() {});
+    }
+    //globals.redrawBasketIcon=redraw;
+    var chatColor=Colors.black;
+    String chatName='Чат';
+    if(globals.missedMessages>0){
+      chatColor=Colors.green;
+      chatName='Чат('+globals.missedMessages.toString()+')';
+    }
+    globals.screenSize=MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: logoffDialog,
         child: Scaffold(
@@ -243,8 +270,8 @@ class InfoScreenState extends State<InfoScreen>{
         title: new Text("Каталог"),
         ),
         new BottomNavigationBarItem(
-          icon: new Icon(Icons.chat_bubble_outline),
-          title: new Text("Чат"),
+          icon: new Icon(Icons.chat_bubble_outline,color: chatColor,),
+          title: new Text(chatName),
           //backgroundColor: Colors.green
         )
       ]),
