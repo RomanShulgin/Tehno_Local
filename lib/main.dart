@@ -13,6 +13,7 @@ import 'Catalog.dart';
 import 'Basket.dart';
 import 'Chat.dart';
 import 'HTTPExchange.dart';
+import 'Payment.dart';
 
 import 'globals.dart' as globals;
 
@@ -159,7 +160,7 @@ class InfoScreenState extends State<InfoScreen>{
   @override
   void initState() {
     super.initState();
-    Timer.periodic(Duration(seconds: 15),(timer){MissedMessages();});
+    Timer.periodic(Duration(seconds: 10),(timer){MissedMessages();});
   }
 
   Future MissedMessages()async{
