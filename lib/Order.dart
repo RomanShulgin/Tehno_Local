@@ -262,7 +262,8 @@ class OrderState extends State<Order> {
           FixDraft(struct,json),
             Row(
               children: <Widget>[
-                RButton("Оплатить",() {Pay(payStruct);}),
+                LightButton("Оплатить",() {Pay(payStruct);}),
+                Container(width: 100,),
                 RButton('Назад', () {
                   Navigator.of(context).pop();
                 }),
@@ -312,7 +313,7 @@ class OrderListState extends State<OrderList> {
             children:[
               TableCell(child:Column(children:[Text('№ КП',textScaleFactor: 0.8,),Text('Дата',textScaleFactor: 0.8,)]) ),
               TableCell(child:Column(children:[Text('№ Заказ',textScaleFactor: 0.8,),Text('Дата',textScaleFactor: 0.8,)]) ),
-              TableCell(child:Column(children:[ Text('Отг ',textScaleFactor: 0.8,),Text('Опл ',textScaleFactor: 0.8,),Text('Док',textScaleFactor: 0.8)],) ),
+              TableCell(child:Column(children:[ Text('Опл ',textScaleFactor: 0.8,),Text('Отг ',textScaleFactor: 0.8,),Text('Док',textScaleFactor: 0.8)],) ),
               //TableCell(child: Text('Док',textScaleFactor: 0.8)),
               TableCell(child: Text('Сумма',textScaleFactor: 1.0)),
               TableCell(child: Text('Комментарий',textScaleFactor: 0.8,)),
