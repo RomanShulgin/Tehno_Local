@@ -18,7 +18,7 @@ class Payment extends StatelessWidget {
 
   return new WebviewScaffold(
       appBar: AppBar(title: Text('Оплата')),
-      url: Uri.encodeFull('https://3dsec.sberbank.ru/payment/docsite/payform-1.html?token=YRF3C5RFICWISEWFR6GJ&def=%7B%22amount%22:%22'+struct['Sum']+'%22%7D&def=%7B%22description%22:%22'+struct['Order']+'%22%7D&ask=email'),//'http://tehno-parts.ru/MyScript/SberPay.php',//'https://3dsec.sberbank.ru/payment/docsite/payform-1.html?token=YRF3C5RFICWISEWFR6GJ&def=%7B"amount":"'+struct['Sum']+'"%7D&def=%7B%22description%22:"'+struct['Order']+'"%7D&ask=email',//
+      url: Uri.encodeFull('https://securepayments.sberbank.ru/payment/docsite/payform-1.html?token=1emgpjc20l18rid7q9c73e98rh&def=%7B%22amount%22:%22'+struct['Sum']+'%22%7D&def=%7B%22description%22:%22'+struct['Order']+'%22%7D&ask=email'),//'http://tehno-parts.ru/MyScript/SberPay.php',//'https://3dsec.sberbank.ru/payment/docsite/payform-1.html?token=YRF3C5RFICWISEWFR6GJ&def=%7B"amount":"'+struct['Sum']+'"%7D&def=%7B%22description%22:"'+struct['Order']+'"%7D&ask=email',//
       withZoom: false,
       allowFileURLs: true,
       withLocalStorage: true,
