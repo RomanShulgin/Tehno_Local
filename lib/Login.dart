@@ -145,7 +145,7 @@ class IdentFormState extends State<IdentForm> {
                           Row(children: <Widget>[Icon(Icons.email),Expanded(child: LightButton('sale@tehno-parts.ru', () {launch("mailto:"+'sale@tehno-parts.ru');}) ),]),
                           //Row(children: <Widget>[Icon(Icons.location_on),Expanded(child: Center(child: LightButton("Как к нам проехать (Я.Карты)", () {launch("yandexmaps://build_route_on_map?lat_to=55.53685594035359&lon_to=37.575195730163564" /*"yandexnavi://build_route_on_map?lat_to=55.53685594035359&amp;lon_to=37.575195730163564"*/);}) )),]),
                         ],)
-                        , 'Для регистрации просьба воспользоваться следующими контактами:'),
+                        , 'Добро пожаловать в систему Технопартс:'),
                   ])
         )
     );

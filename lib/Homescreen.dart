@@ -13,6 +13,7 @@ class HomeScreenState extends State<HomeScreen> {
   int inn;
   String display;
   final txt1= TextEditingController();
+  List warningList =List<Widget>();
 
   var name = 'Неопределено';
 
@@ -29,12 +30,20 @@ class HomeScreenState extends State<HomeScreen> {
   Future getData(input) async{
     //var input;
     var post=new Post1c();
-    post.metod="baseinfo";
+    post.metod="basicinfo";
     post.input="";
     await post.HttpGet();
     name=post.text;
     setState(() {
       name=post.text;
+      var mesMas=getParam(name, "МассивУведомлений");
+      warningList.clear();
+      for(var message in mesMas){
+        warningList.add(LGroup(
+             Text('Количество сообщений: '+message['Уведомления'][0]['КоличествоСообщений'].toString()),
+            message['Название']
+        ));
+      }
 
     });
   }
@@ -69,34 +78,13 @@ class HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Group(
-                       Text(getParam(name, "Контрагент")),
-                      'Контрагент'),
-                  Group(
-                      Row(
-                          children:
-                          [Expanded(child: LightButton( getParam(name, "ТипЦен"),
-                             () {showPriceInfo();},
-                          )),
-                          ]),
-                          'Тип цен'),
+                       Text(getParam(name, "ФИО")),
+                      'Пользователь'),
 
+                 Group(
+                      Column(children: warningList) //Text('Ok')//
+                      , 'Уведомления'),
 
-                  Group(
-                      Row(children: <Widget>[Expanded(child: LightButton(
-                         getParam(name, "Баланс").toString(),  () {showBalance();},
-                      )),
-
-                      ]), 'Баланс'),
-                  Group(
-                      Column(children: <Widget>[
-                        Row(children: <Widget>[Icon(Icons.person),Expanded(child: Center(child: Text(getParam(name, "СтрМенеджер")['Имя']) )),]),
-                        Row(children: <Widget>[Icon(Icons.phone),Expanded(child: LightButton(getParam(name, "СтрМенеджер")['Телефон'], () {launch("tel:"+getParam(name, "СтрМенеджер")['Телефон']);}) ),]),
-                        Row(children: <Widget>[Icon(Icons.email),Expanded(child: LightButton(getParam(name, "СтрМенеджер")['ЕМайл'], () {launch("mailto:"+getParam(name, "СтрМенеджер")['ЕМайл']);}) ),]),
-                        Row(children: <Widget>[Icon(Icons.comment),Expanded(child: LightButton('Skype', () {launch("skype:"+getParam(name, "СтрМенеджер")['Скайп']);}) ),]),
-                        Row(children: <Widget>[Icon(Icons.location_on),Expanded(child: LightButton("Контакты организации", () {Navigator.pushNamed(context, '/Contacts');}) ),]),
-                        //Row(children: <Widget>[Icon(Icons.location_on),Expanded(child: Center(child: LightButton("Как к нам проехать (Я.Карты)", () {launch("yandexmaps://build_route_on_map?lat_to=55.53685594035359&lon_to=37.575195730163564" /*"yandexnavi://build_route_on_map?lat_to=55.53685594035359&amp;lon_to=37.575195730163564"*/);}) )),]),
-                      ],)
-                      , 'Менеджер'),
                 ])),
 
 

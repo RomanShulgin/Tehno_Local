@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:tehnoparts/main.dart';
+import 'package:tehnoparts_local/main.dart';
 
 
 void main() {

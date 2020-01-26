@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tehnoparts/Alarms.dart';
+import 'Alarms.dart';
 import 'HTTPExchange.dart';
 import 'styledwidgets.dart';
 import 'package:date_format/date_format.dart';

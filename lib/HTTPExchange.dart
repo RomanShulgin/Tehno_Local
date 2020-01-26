@@ -32,8 +32,8 @@ class Post1c
     }
 
     print("Input=" + input);
-    print("Rec=" + 'http://46.34.155.26/dist/hs/GetBasicInfo/$user/$password/$metod/$input');//'http://46.34.155.26/dist/hs/GetBasicInfo/patamdart/170574/$metod/?$input'
-    var response = await http.get('http://46.34.155.26/dist/hs/GetBasicInfo/$user/$password/$metod/$input',headers: {"Content-Type":"text/html; charset=utf-8" });
+    print("Rec=" + 'http://46.34.155.26/Tehno/hs/GetBasicInfo/$user/$password/$metod/$input');//'http://46.34.155.26/dist/hs/GetBasicInfo/patamdart/170574/$metod/?$input'
+    var response = await http.get('http://46.34.155.26/Tehno/hs/GetBasicInfo/$user/$password/$metod/$input',headers: {"Content-Type":"text/html; charset=utf-8" });
     print("DATAResult=" + response.body.toString());
     print("Code= "+response.statusCode.toString());
     if (response.statusCode==200){

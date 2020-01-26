@@ -3,7 +3,7 @@ import 'package:flutter_cache_store/flutter_cache_store.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 import 'styledwidgets.dart';
-import 'Forms.dart';
+import 'Login.dart';
 import 'Homescreen.dart';
 import 'PriceDialog.dart';
 import 'Contacts.dart';
@@ -19,12 +19,13 @@ import 'globals.dart' as globals;
 
 void main() => runApp(MyApp());
 
-Future getStoreInstance() async
-{ if(globals.storeSet==false){
-  CacheStore.setPolicy(LRUCachePolicy(maxCount: 200));
-  CacheStore store = await CacheStore.getInstance();
-  globals.store=store;
-  globals.storeSet=true;}
+Future getStoreInstance() async {
+  if (globals.storeSet == false) {
+    CacheStore.setPolicy(LRUCachePolicy(maxCount: 200));
+    CacheStore store = await CacheStore.getInstance();
+    globals.store = store;
+    globals.storeSet = true;
+  }
   return globals.store;
 }
 
@@ -32,21 +33,22 @@ class LRUCachePolicy extends LessRecentlyUsedPolicy {
   LRUCachePolicy({int maxCount}) : super(maxCount: maxCount);
 
   @override
-  String generateFilename({final String key, final String url}) => key; // use key as the filename
+  String generateFilename({final String key, final String url}) =>
+      key; // use key as the filename
 
 }
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-    globals.currentcatalog=globals.baseCatalog;//основа
+    globals.currentcatalog = globals.baseCatalog; //основа
     //Timer.periodic(Duration(seconds: 5),(timer){InfoScreenState.MissedMessages;});
     //globals.basketKey=new GlobalKey();
     getStoreInstance();
-   // globals.store=store;
+    // globals.store=store;
     return MaterialApp(
-      routes: {'/': (BuildContext context) => IdentForm(),
+      routes: {
+        '/': (BuildContext context) => IdentForm(),
         '/Home': (BuildContext context) => InfoScreen(),
         '/Price': (BuildContext context) => PriceDialog(),
         '/Balance': (BuildContext context) => Balance(),
@@ -57,99 +59,97 @@ class MyApp extends StatelessWidget {
       },
       debugShowCheckedModeBanner: false,
       title: 'Технопартс',
-      theme: ThemeData(primarySwatch: Colors.orange, //fontFamily: 'Xolonium',
+      theme: ThemeData(
+        primarySwatch: Colors.orange, //fontFamily: 'Xolonium',
         textTheme: TextTheme(
-            button: TextStyle(fontSize: 16.0, letterSpacing: 0.0),
-            body1: TextStyle(fontSize: 16.0),
+          button: TextStyle(fontSize: 16.0, letterSpacing: 0.0),
+          body1: TextStyle(fontSize: 16.0),
           //body2: TextStyle(fontSize: 20.0),
         ),
-
       ),
     );
   }
 }
 
-
-
 class MyBody extends StatelessWidget {
-
   MyBody();
 
   Widget build(BuildContext context) {
-     return new HomeScreen();
+    return new HomeScreen();
     //);
-
   }
 }
 
-
-class basketIcon extends StatefulWidget{
+class basketIcon extends StatefulWidget {
   /*basketIcon({Key key}): super(key: key);*/
   @override
   createState() => new basketIconState();
 }
 
-class basketIconState extends State<basketIcon>{
-
+class basketIconState extends State<basketIcon> {
   Widget build(BuildContext context) {
-    var basketcolor,amount;
+    var basketcolor, amount;
     void redraw() {
-      setState(() {amount=0;});
-    }
-    globals.redrawBasketIcon=redraw;
-
-    amount=0;
-    basketcolor=Colors.black;
-    if (globals.basket.isNotEmpty)
-    {
-    for (var el in globals.basket) {
-      amount = amount + el['amount'];
-    };
-    if(amount>0)
-      basketcolor=Colors.green;
+      setState(() {
+        amount = 0;
+      });
     }
 
-    else
-      basketcolor=Colors.black;
+    globals.redrawBasketIcon = redraw;
+
+    amount = 0;
+    basketcolor = Colors.black;
+    if (globals.basket.isNotEmpty) {
+      for (var el in globals.basket) {
+        amount = amount + el['amount'];
+      }
+      ;
+      if (amount > 0) basketcolor = Colors.green;
+    } else
+      basketcolor = Colors.black;
     /*print("В корзине "+globals.basket.last.toString());*/
 
-  if (amount>0){
-    print('корзина перерисовывается '+amount.toString());
-  return Stack(
-      alignment: Alignment.centerRight,
-      children:[
-  IconButton(
-    color: basketcolor,
-    icon: new Icon(Icons.shopping_cart),
-    onPressed: () {Navigator.pushNamed(context, '/Basket');},
-    ),
-  Positioned(child:Text(amount.toString()),right: 3.0,)
-  ]
-  );}
-  else{
-    return Stack(
-        alignment: Alignment.centerRight,
-        children:[
-          IconButton(
-            color: basketcolor,
-            icon: new Icon(Icons.shopping_cart),
-            onPressed: () {Navigator.pushNamed(context, '/Basket');},
-          ),
-        ]
-    );
-  }
+    if (amount > 0) {
+      print('корзина перерисовывается ' + amount.toString());
+      return Stack(alignment: Alignment.centerRight, children: [
+        IconButton(
+          color: basketcolor,
+          icon: new Icon(Icons.shopping_cart),
+          onPressed: () {
+            Navigator.pushNamed(context, '/Basket');
+          },
+        ),
+        Positioned(
+          child: Text(amount.toString()),
+          right: 3.0,
+        )
+      ]);
+    } else {
+      return Stack(alignment: Alignment.centerRight, children: [
+        IconButton(
+          color: basketcolor,
+          icon: new Icon(Icons.shopping_cart),
+          onPressed: () {
+            Navigator.pushNamed(context, '/Basket');
+          },
+        ),
+      ]);
+    }
   }
 }
 
-class InfoScreen extends StatefulWidget{
+class InfoScreen extends StatefulWidget {
   @override
   createState() => new InfoScreenState();
 }
 
-class InfoScreenState extends State<InfoScreen>{
-
-
-  List<Widget> tabs=[MyBody(),OrderList(globals.datefrom,globals.dateto),Catalog(),Chat()];
+class InfoScreenState extends State<InfoScreen> {
+  List<Widget> tabs = [
+    MyBody(),
+    OrderList(globals.datefrom, globals.dateto),
+    Catalog(),
+    Chat()
+  ];
   //Timer.periodic(Duration(seconds: 5),(timer){MissedMessages;});
   void onTabTapped(int index) {
     setState(() {
@@ -160,19 +160,21 @@ class InfoScreenState extends State<InfoScreen>{
   @override
   void initState() {
     super.initState();
-    Timer.periodic(Duration(seconds: 10),(timer){MissedMessages();});
+    Timer.periodic(Duration(seconds: 10), (timer) {
+      MissedMessages();
+    });
   }
 
-  Future MissedMessages()async{
+  Future MissedMessages() async {
     var post = new Post1c();
 
     post.metod = "missedmessages";
     post.input = '?messagesquantity=' + 100.toString();
     await post.HttpGet();
-    int missedMessages=0;
-    missedMessages=getParam(post.text, 'КоличествоСообщений');
-    if(missedMessages!=globals.missedMessages){
-      globals.missedMessages=missedMessages;
+    int missedMessages = 0;
+    missedMessages = getParam(post.text, 'КоличествоСообщенийВеб');
+    if (missedMessages != globals.missedMessages) {
+      globals.missedMessages = missedMessages;
 
       setState(() {
         //globals.currentIndex = index;
@@ -180,9 +182,9 @@ class InfoScreenState extends State<InfoScreen>{
     }
   }
 
-
-  Future<bool> logoffDialog(){
-    if((globals.currentIndex==2)&&(globals.currentcatalog!= globals.baseCatalog)){
+  Future<bool> logoffDialog() {
+    if ((globals.currentIndex == 2) &&
+        (globals.currentcatalog != globals.baseCatalog)) {
       return Future.value(true);
     }
     return showDialog(
@@ -196,8 +198,7 @@ class InfoScreenState extends State<InfoScreen>{
             // usually buttons at the bottom of the dialog
             new FlatButton(
               child: new Text("Да"),
-              onPressed: () => Navigator.of(context).pop(true)
-              ,
+              onPressed: () => Navigator.of(context).pop(true),
             ),
             new FlatButton(
               child: new Text("Нет"),
@@ -210,72 +211,75 @@ class InfoScreenState extends State<InfoScreen>{
       },
     );
   }
-  void GetMissedMessages(){
+
+  void GetMissedMessages() {
     MissedMessages();
   }
+
   @override
   Widget build(BuildContext context) {
-
     void redraw() {
       setState(() {});
     }
+
     //globals.redrawBasketIcon=redraw;
-    var chatColor=Colors.black;
-    String chatName='Чат';
-    if(globals.missedMessages>0){
-      chatColor=Colors.green;
-      chatName='Чат('+globals.missedMessages.toString()+')';
+    var chatColor = Colors.black;
+    String chatName = 'Чат';
+    if (globals.missedMessages > 0) {
+      chatColor = Colors.green;
+      chatName = 'Чат(' + globals.missedMessages.toString() + ')';
     }
-    globals.screenSize=MediaQuery.of(context).size;
+    globals.screenSize = MediaQuery.of(context).size;
     return WillPopScope(
-      onWillPop: logoffDialog,
+        onWillPop: logoffDialog,
         child: Scaffold(
           resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        leading: new Icon(Icons.menu),
-        title: Text(globals.firm),
-        actions: <Widget>[
-          new basketIcon(),
-          /*new IconButton(
+          appBar: AppBar(
+            leading: new Icon(Icons.menu),
+            title: Text(globals.firm),
+            actions: <Widget>[
+              new basketIcon(),
+              /*new IconButton(
             color: basketcolor,
             icon: new Icon(Icons.shopping_cart),
             onPressed: () {Navigator.pushNamed(context, '/Basket');},
           ),*/
-          new IconButton(
-            icon: new Icon(Icons.autorenew),
-            onPressed: () {
-              //print('renew');
-              globals.tabredraw[globals.currentIndex]();
-              },
-          )
-        ],
-      ),
-      body: tabs[globals.currentIndex],
-
-      bottomNavigationBar: new BottomNavigationBar(
-          onTap: onTabTapped,
-          currentIndex: globals.currentIndex,
-          type: BottomNavigationBarType.fixed,
-          items: [
-        new BottomNavigationBarItem(
-          icon: new Icon(Icons.home),
-          title: new Text("Главная"),
-        ),
-        new BottomNavigationBarItem(
-          icon: new Icon(Icons.list),
-          title: new Text("Заказы"),
-
-        ),
-        new BottomNavigationBarItem(
-        icon: new Icon(Icons.category),
-        title: new Text("Каталог"),
-        ),
-        new BottomNavigationBarItem(
-          icon: new Icon(Icons.chat_bubble_outline,color: chatColor,),
-          title: new Text(chatName),
-          //backgroundColor: Colors.green
-        )
-      ]),
-    ));
+              new IconButton(
+                icon: new Icon(Icons.autorenew),
+                onPressed: () {
+                  //print('renew');
+                  globals.tabredraw[globals.currentIndex]();
+                },
+              )
+            ],
+          ),
+          body: tabs[globals.currentIndex],
+          bottomNavigationBar: new BottomNavigationBar(
+              onTap: onTabTapped,
+              currentIndex: globals.currentIndex,
+              type: BottomNavigationBarType.fixed,
+              items: [
+                new BottomNavigationBarItem(
+                  icon: new Icon(Icons.home),
+                  title: new Text("Главная"),
+                ),
+                /*new BottomNavigationBarItem(
+                  icon: new Icon(Icons.list),
+                  title: new Text("Заказы"),
+                ),
+                new BottomNavigationBarItem(
+                  icon: new Icon(Icons.category),
+                  title: new Text("Каталог"),
+                ),*/
+                new BottomNavigationBarItem(
+                  icon: new Icon(
+                    Icons.chat_bubble_outline,
+                    color: chatColor,
+                  ),
+                  title: new Text(chatName),
+                  //backgroundColor: Colors.green
+                )
+              ]),
+        ));
   }
 }
