@@ -7,21 +7,21 @@ import 'dart:convert';
 import 'package:flutter/scheduler.dart';
 import 'main.dart';
 
-class Chat extends StatefulWidget {
+class ChatLocal extends StatefulWidget {
   //var struct;//содержит структуру с номером и датой
   //Order(this.struct);
 
   bool isloading = false;
   @override
-  createState() => new ChatState();
+  createState() => new ChatLocalState();
 }
 
-class listUsers extends StatefulWidget {
+class listLocalUsers extends StatefulWidget {
   @override
-  createState() => new listUsersState();
+  createState() => new listLocalUsersState();
 }
 
-class listUsersState extends State {
+class listLocalUsersState extends State {
   bool isloading = true;
   var data;
 
@@ -33,9 +33,9 @@ class listUsersState extends State {
     }
   }
 
-  Future getUsers() async {
+  Future getLocalUsers() async {
     var post = new Post1c();
-    post.metod = "chatwebusers";
+    post.metod = "chatusers";
     post.input = '';
     await post.HttpGet();
     var json = post.text;
@@ -53,13 +53,10 @@ class listUsersState extends State {
         return -1;
       else if (a['Сообщения'] < b['Сообщения'])
         return 1;
-      else if (a["Куратор"] != "0")
+      else if (a["Активен"])
         return -1;
-      else
-        return a['Имя']
-            .toString()
-            .toLowerCase()
-            .compareTo(b['Имя'].toString().toLowerCase());
+      else if (b["Активен"]) return 1;
+      return 0;
     });
 
     var listUsers = List<Widget>();
@@ -67,16 +64,16 @@ class listUsersState extends State {
       if (user["Активен"] == false)
         listUsers
             .add(ChatButtonOff(user['Имя'], user['Сообщения'].toString(), () {
-          globals.chatWebUser = user['Имя'];
-          globals.tabredraw[2]();
+          globals.chatLocalUser = user['Имя'];
+          globals.tabredraw[1]();
           redrawname();
           Navigator.pop(context);
         }));
       else
         listUsers
             .add(ChatButtonOn(user['Имя'], user['Сообщения'].toString(), () {
-          globals.chatWebUser = user['Имя'];
-          globals.tabredraw[2]();
+          globals.chatLocalUser = user['Имя'];
+          globals.tabredraw[1]();
           redrawname();
           Navigator.pop(context);
         }));
@@ -87,7 +84,7 @@ class listUsersState extends State {
   Widget build(BuildContext context) {
     print('Bild drawer');
     if (isloading) {
-      getUsers();
+      getLocalUsers();
       return LinearProgressIndicator();
     } else {
       return ListView(
@@ -149,7 +146,7 @@ class Msg extends StatelessWidget {
   }
 }
 
-class ChatState extends State<Chat> {
+class ChatLocalState extends State<ChatLocal> {
   bool isloading = true;
   var chatjson;
   List messages = [];
@@ -160,11 +157,11 @@ class ChatState extends State<Chat> {
     var post = new Post1c();
     var recipient;
     recipient =
-        (globals.chatWebUser == '1. Общий чат') ? '' : globals.chatWebUser;
-    post.metod = "chatweblist";
+        (globals.chatLocalUser == '1. Общий чат') ? '' : globals.chatLocalUser;
+    post.metod = "chatlist";
     post.input =
         '?messagesquantity=' + 20.toString() + "&recipient=" + recipient;
-    globals.chatWebUser;
+    globals.chatLocalUser;
     await post.HttpGet();
     chatjson = post.text;
     var mstring = getParam(chatjson, 'Сообщения');
@@ -176,10 +173,10 @@ class ChatState extends State<Chat> {
     isloading = false;
     setState(() {});
     await WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _controller.jumpTo(_controller.position.maxScrollExtent));
-    Future.delayed(Duration(milliseconds: 300), () {
+        (_) => _controller.jumpTo(_controller.position.minScrollExtent));
+    Future.delayed(Duration(milliseconds: 500), () {
       _controller.jumpTo(
-        _controller.position.maxScrollExtent,
+        _controller.position.minScrollExtent,
       );
     });
     /*WidgetsBinding.instance.addPostFrameCallback((_) => controller.animateTo(
@@ -190,8 +187,12 @@ class ChatState extends State<Chat> {
 
   Widget message(struct) {
     if (struct['Направление'] == 'Исходящее') {
-      return Msg(Text(struct['Сообщение']),
-          struct['Автор'] + ' ' + struct['Период'], 'right');
+      return Msg(
+          Text(struct['Сообщение']),
+          ((struct['Прочтено'] == 'истина') ? 'Прочтено' : '') +
+              ' ' +
+              struct['Период'],
+          'right');
     } else {
       return Msg(Text(struct['Сообщение']),
           struct['Автор'] + ' ' + struct['Период'], 'left');
@@ -224,6 +225,7 @@ class ChatState extends State<Chat> {
           ),
         ),
         child: ListView.builder(
+            reverse: true,
             controller: _controller,
             itemCount: messages.length,
             itemBuilder: (BuildContext ctxt, int index) =>
@@ -234,11 +236,11 @@ class ChatState extends State<Chat> {
 
   Future sendMessage(message) async {
     var post = new Post1c();
-    post.metod = "sendmessageweb";
+    post.metod = "sendmessage";
     post.input = '?messagesquantity=' +
         20.toString() +
         '&recipient=' +
-        globals.chatWebUser;
+        globals.chatLocalUser;
     await post.HttpPost(message);
     var jsont = post.text;
     if (post.state == 'ok') {
@@ -288,8 +290,8 @@ class ChatState extends State<Chat> {
     );
   }
 
-  void redrawwebchat() {
-    print('redraw веб');
+  void redrawchat() {
+    print('redraw свои');
     setState(() {
       isloading = true;
     });
@@ -319,7 +321,7 @@ class ChatState extends State<Chat> {
 
   Widget build(BuildContext context) {
     //print('dialog');
-    globals.tabredraw[2] = redrawwebchat;
+    globals.tabredraw[1] = redrawchat;
     //Timer(Duration(seconds: 10),MissedMessages);
 
     if (isloading) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_store/flutter_cache_store.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 import 'styledwidgets.dart';
@@ -14,6 +15,9 @@ import 'Basket.dart';
 import 'Chat.dart';
 import 'HTTPExchange.dart';
 import 'Payment.dart';
+import 'Alarms.dart';
+import 'ChatLocal.dart';
+import 'Email.dart';
 
 import 'globals.dart' as globals;
 
@@ -146,9 +150,10 @@ class InfoScreen extends StatefulWidget {
 class InfoScreenState extends State<InfoScreen> {
   List<Widget> tabs = [
     MyBody(),
-    OrderList(globals.datefrom, globals.dateto),
-    Catalog(),
-    Chat()
+    //OrderList(globals.datefrom, globals.dateto),
+    ChatLocal(),
+    Chat(),
+    EmailList(),
   ];
   //Timer.periodic(Duration(seconds: 5),(timer){MissedMessages;});
   void onTabTapped(int index) {
@@ -157,10 +162,39 @@ class InfoScreenState extends State<InfoScreen> {
     });
   }
 
+  void registerNotification() {
+    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+    _firebaseMessaging.requestNotificationPermissions();
+
+    _firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
+      print('onMessage: $message');
+      PopUpInfo(message['notification']['title'],
+          message['notification']['body'], context);
+      return;
+    }, onResume: (Map<String, dynamic> message) {
+      print('onResume: $message');
+      return;
+    }, onLaunch: (Map<String, dynamic> message) {
+      print('onLaunch: $message');
+      return;
+    });
+
+    _firebaseMessaging.getToken().then((token) {
+      print('token: $token');
+      var post = new Post1c();
+      post.metod = "token";
+      post.input = '?token=' + token;
+      post.HttpGet();
+    }).catchError((err) {});
+  }
+
   @override
   void initState() {
     super.initState();
-    Timer.periodic(Duration(seconds: 10), (timer) {
+    registerNotification();
+    MissedMessages();
+    Timer.periodic(Duration(seconds: 10 * 60), (timer) {
       MissedMessages();
     });
   }
@@ -171,10 +205,28 @@ class InfoScreenState extends State<InfoScreen> {
     post.metod = "missedmessages";
     post.input = '?messagesquantity=' + 100.toString();
     await post.HttpGet();
-    int missedMessages = 0;
-    missedMessages = getParam(post.text, 'КоличествоСообщенийВеб');
+    int missedWebMessages = 0;
+    missedWebMessages = getParam(post.text, 'КоличествоСообщенийВеб');
+    if (missedWebMessages != globals.missedWebMessages) {
+      globals.missedWebMessages = missedWebMessages;
+
+      setState(() {
+        //globals.currentIndex = index;
+      });
+    }
+
+    int missedMessages = getParam(post.text, 'КоличествоСообщений');
     if (missedMessages != globals.missedMessages) {
       globals.missedMessages = missedMessages;
+
+      setState(() {
+        //globals.currentIndex = index;
+      });
+    }
+
+    int missedEmails = getParam(post.text, 'КоличествоПисем');
+    if (missedEmails != globals.missedEmails) {
+      globals.missedEmails = missedEmails;
 
       setState(() {
         //globals.currentIndex = index;
@@ -216,6 +268,31 @@ class InfoScreenState extends State<InfoScreen> {
     MissedMessages();
   }
 
+  Widget getDrawer(index) {
+    switch (index) {
+      case 1:
+        return listLocalUsers();
+      case 2:
+        return listUsers();
+      case 3:
+        return listGroups();
+    }
+  }
+
+  Widget Title() {
+    print("Current tab " + globals.currentIndex.toString());
+    switch (globals.currentIndex) {
+      case 0:
+        return Text("Главная");
+      case 1:
+        return Text(globals.chatLocalUser);
+      case 2:
+        return Text(globals.chatWebUser);
+      case 3:
+        return Text(globals.emailgroup);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     void redraw() {
@@ -224,19 +301,37 @@ class InfoScreenState extends State<InfoScreen> {
 
     //globals.redrawBasketIcon=redraw;
     var chatColor = Colors.black;
-    String chatName = 'Чат';
-    if (globals.missedMessages > 0) {
+    String chatName = 'Чужие';
+    if (globals.missedWebMessages > 0) {
       chatColor = Colors.green;
-      chatName = 'Чат(' + globals.missedMessages.toString() + ')';
+      chatName = 'Чужие(' + globals.missedWebMessages.toString() + ')';
     }
+
+    var chatLocalColor = Colors.black;
+    String chatLocalName = 'Свои';
+    if (globals.missedMessages > 0) {
+      chatLocalColor = Colors.green;
+      chatLocalName = 'Свои(' + globals.missedMessages.toString() + ')';
+    }
+
+    var emailColor = Colors.black;
+    String emailName = 'Почта';
+    if (globals.missedEmails > 0) {
+      emailColor = Colors.green;
+      emailName = 'Почта(' + globals.missedEmails.toString() + ')';
+    }
+
     globals.screenSize = MediaQuery.of(context).size;
     return WillPopScope(
         onWillPop: logoffDialog,
         child: Scaffold(
+          drawer: Drawer(
+            child: getDrawer(globals.currentIndex),
+          ),
           resizeToAvoidBottomInset: true,
           appBar: AppBar(
-            leading: new Icon(Icons.menu),
-            title: Text(globals.firm),
+            // leading: IconButton(icon: new Icon(Icons.menu), onPressed: () {}),
+            title: Title(),
             actions: <Widget>[
               new basketIcon(),
               /*new IconButton(
@@ -274,11 +369,26 @@ class InfoScreenState extends State<InfoScreen> {
                 new BottomNavigationBarItem(
                   icon: new Icon(
                     Icons.chat_bubble_outline,
+                    color: chatLocalColor,
+                  ),
+                  title: new Text(chatLocalName),
+                ),
+                new BottomNavigationBarItem(
+                  icon: new Icon(
+                    Icons.chat_bubble_outline,
                     color: chatColor,
                   ),
                   title: new Text(chatName),
+
                   //backgroundColor: Colors.green
-                )
+                ),
+                new BottomNavigationBarItem(
+                  icon: new Icon(
+                    Icons.email,
+                    color: emailColor,
+                  ),
+                  title: new Text(emailName),
+                ),
               ]),
         ));
   }

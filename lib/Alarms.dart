@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-
-Future<void> PopUpInfo (title,text,context) {
+Future<void> PopUpInfo(title, text, context) {
+  print('Popup fired');
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
+      print('Popup fired2');
       return AlertDialog(
         title: Text(title),
         content: Text(text),
@@ -21,8 +22,7 @@ Future<void> PopUpInfo (title,text,context) {
   );
 }
 
-
-Future<void> PopUpDialog (title,text,buttons,context) {
+Future<void> PopUpDialog(title, text, buttons, context) {
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {

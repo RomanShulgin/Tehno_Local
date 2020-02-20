@@ -271,10 +271,10 @@ class itemGroup extends StatefulWidget {
 class itemGroupState extends State<itemGroup> {
   var data;
 
-  void redraw()
-  {
-    var statescaffold = context.ancestorStateOfType(TypeMatcher<InfoScreenState>());
-    if(statescaffold!=null){
+  void redraw() {
+    var statescaffold =
+        context.ancestorStateOfType(TypeMatcher<InfoScreenState>());
+    if (statescaffold != null) {
       statescaffold.setState(() {});
       print('перерисовываем корзинку');
     }
@@ -285,9 +285,6 @@ class itemGroupState extends State<itemGroup> {
     var items = data['Элементы'];
     var title = "------------------------";
 
-
-
-
     List itemList = new List<Widget>();
     String user = globals.user;
     String password = globals.password;
@@ -296,7 +293,7 @@ class itemGroupState extends State<itemGroup> {
     var imageaddr =
         'http://46.34.155.26/dist/hs/GetBasicInfo/$user/$password/groupicon/?name=$src';
     if (src != "Остальное") title = src;
-    for (var item in items) itemList.add(nomItem(item,redraw));
+    for (var item in items) itemList.add(nomItem(item, redraw));
     return ExpansionTile(
       title: Text(title),
       leading: Image.network(imageaddr),
@@ -412,8 +409,8 @@ class filterWidgetState extends State<filterWidget> {
   bool isloading = true;
   bool loaded = false;
   List<Widget> paramList = new List();
-  Map<String, String> ParaMap=new Map();
-  Map<String,List> AvailPar=new Map();//доступные для выбора параметры
+  Map<String, String> ParaMap = new Map();
+  Map<String, List> AvailPar = new Map(); //доступные для выбора параметры
   var json;
   var data;
 
@@ -432,11 +429,11 @@ class filterWidgetState extends State<filterWidget> {
         //параметры уже задавались
         ParaMap = globals.filters[code];
       } else {
-        for(var par in data["Структура"]){
-          ParaMap[par]=null;//забиваем пустыми фильтрами по умолчанию
+        for (var par in data["Структура"]) {
+          ParaMap[par] = null; //забиваем пустыми фильтрами по умолчанию
         }
       }
-      await getAvailParByCode(code,'');
+      await getAvailParByCode(code, '');
       setState(() {});
     } else {
       loaded = false;
@@ -444,35 +441,35 @@ class filterWidgetState extends State<filterWidget> {
     }
   }
 
-  Future getAvailParByCode(code,parameter) async {
-    String paramstring='';
+  Future getAvailParByCode(code, parameter) async {
+    String paramstring = '';
     var post = new Post1c();
-    int num=0;
-    for(var el in ParaMap.values){
+    int num = 0;
+    for (var el in ParaMap.values) {
       num++;
-      if(el!=null)
-      if(el.isNotEmpty)
-      paramstring=paramstring+'Измерение'+num.toString()+"="+el+";";
+      if (el != null) if (el.isNotEmpty)
+        paramstring =
+            paramstring + 'Измерение' + num.toString() + "=" + el + ";";
     }
 
     post.metod = "availparbycode";
-    post.input = '?code=' + code+'&list='+paramstring+'&parameter='+parameter;
+    post.input =
+        '?code=' + code + '&list=' + paramstring + '&parameter=' + parameter;
     await post.HttpGet();
     json = post.text;
     isloading = false;
     //print(post.text);
 
-
-
     if (post.state == 'ok') {
       data = jsonDecode(json);
-      var struct=data["Структура"];
+      var struct = data["Структура"];
 
       loaded = true;
-      num=0;
-      for(var par in ParaMap.keys){//ключи уже должны быть заданы...
+      num = 0;
+      for (var par in ParaMap.keys) {
+        //ключи уже должны быть заданы...
         num++;
-        AvailPar[par]=struct['Измерение'+num.toString()];
+        AvailPar[par] = struct['Измерение' + num.toString()];
       }
       setState(() {});
     } else {
@@ -491,43 +488,52 @@ class filterWidgetState extends State<filterWidget> {
 
       //for(var ap in )
       paramList.clear();
-      for (var par in ParaMap.keys){
-        List<DropdownMenuItem>DDMI=new List();
-        if(AvailPar[par]!=null)
-          for(var ap in AvailPar[par])
-            DDMI.add(DropdownMenuItem(child: Text(ap),value: ap));
-        paramList.add(
-            LGroup(
-                Center(
-                  child: Row(
-                    children: <Widget>[
-                      DropdownButton(
-                        items: DDMI,
-                        value: ParaMap[par],
-                        onChanged: (value){setState(() {ParaMap[par]=value; globals.filters[widget.structCode]=ParaMap; getAvailParByCode(widget.structCode,par);});},
-                        hint: Text('Выберите фильтр.......'),
-                      ),
-                      IconButton(
-                          icon: Icon(
-                            Icons.highlight_off,
-                            size: 35.0,
-                            color: Colors.red,
-                          ),
-                          onPressed: () {
-                            setState(() {ParaMap[par]=null; globals.filters[widget.structCode]=ParaMap;getAvailParByCode(widget.structCode,par);});
-                          }),
-                    ],
+      for (var par in ParaMap.keys) {
+        List<DropdownMenuItem> DDMI = new List();
+        if (AvailPar[par] != null)
+          for (var ap in AvailPar[par])
+            DDMI.add(DropdownMenuItem(child: Text(ap), value: ap));
+        paramList.add(LGroup(
+            Center(
+              child: Row(
+                children: <Widget>[
+                  DropdownButton(
+                    items: DDMI,
+                    value: ParaMap[par],
+                    onChanged: (value) {
+                      setState(() {
+                        ParaMap[par] = value;
+                        globals.filters[widget.structCode] = ParaMap;
+                        getAvailParByCode(widget.structCode, par);
+                      });
+                    },
+                    hint: Text('Выберите фильтр.......'),
                   ),
-                )
-                ,par));
+                  IconButton(
+                      icon: Icon(
+                        Icons.highlight_off,
+                        size: 35.0,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          ParaMap[par] = null;
+                          globals.filters[widget.structCode] = ParaMap;
+                          getAvailParByCode(widget.structCode, par);
+                        });
+                      }),
+                ],
+              ),
+            ),
+            par));
       }
     }
 
-    return new SingleChildScrollView(child:Column(children: paramList));
+    return new SingleChildScrollView(child: Column(children: paramList));
   }
 }
 
-void filter(structCode, selected, context,redraw) {
+void filter(structCode, selected, context, redraw) {
   showDialog(
     barrierDismissible: false,
     context: context,
@@ -624,29 +630,26 @@ class CatalogState extends State<Catalog> {
   Future showCatalog(current) async {
     var post = new Post1c();
     var ParaMap;
-    var paramstring='';
+    var paramstring = '';
     if (globals.filters.containsKey(current)) {
       //параметры уже задавались
       ParaMap = globals.filters[current];
-      int num=0;
-      for(var el in ParaMap.values){
+      int num = 0;
+      for (var el in ParaMap.values) {
         num++;
-        if(el!=null)
-          if(el.isNotEmpty)
-            paramstring=paramstring+'Измерение'+num.toString()+"="+el+";";
+        if (el != null) if (el.isNotEmpty)
+          paramstring =
+              paramstring + 'Измерение' + num.toString() + "=" + el + ";";
       }
-
     }
 
-
     post.metod = "catalog";
-    post.input = '?current=' + current + '&list=' +paramstring;
+    post.input = '?current=' + current + '&list=' + paramstring;
     await post.HttpGet();
     json = post.text;
     isloading = false;
     setState(() {});
   }
-
 
   bool catBack() {
     isloading = true;
@@ -727,10 +730,10 @@ class CatalogState extends State<Catalog> {
     return overgroupList;
   }
 
-  void redraw(){
+  void redraw() {
     print('redraw catalog');
-    setState(() {isloading=true;
-
+    setState(() {
+      isloading = true;
     });
   }
 
@@ -761,12 +764,11 @@ class CatalogState extends State<Catalog> {
               shape: new RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(10.0)),
               onPressed: () {
-                filter(structCode, selected, context,redraw);
-
+                filter(structCode, selected, context, redraw);
               },
               child: Text("Фильтр"),
             ),
-           // Text(structCode),
+            // Text(structCode),
           ],
         ),
         Expanded(
@@ -782,7 +784,7 @@ class CatalogState extends State<Catalog> {
 
   Widget build(BuildContext context) {
     //print('dialog');
-    globals.tabredraw[2]=redraw;
+    globals.tabredraw[3] = redraw;
     if (isloading) {
       showCatalog(globals.currentcatalog);
       return LinearProgressIndicator();

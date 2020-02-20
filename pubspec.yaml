@@ -24,6 +24,7 @@ dependencies:
   indexed_list_view: ^0.0.5
   url_launcher: ^5.0.1
   flutter_webview_plugin: ^0.3.9+1
+  firebase_messaging: ^5.1.0
   flutter:
     sdk: flutter
 

@@ -78,7 +78,6 @@ class ContWithoutBorder extends StatelessWidget {
   }
 }
 
-
 class ContSmallMargin extends StatelessWidget {
   final child;
 
@@ -93,33 +92,35 @@ class ContSmallMargin extends StatelessWidget {
   }
 }
 
-
 class Check extends StatelessWidget {
-  final txt,isize;
+  final txt, isize;
 
-
-   Check(this.txt,[this.isize=24.0]);
+  Check(this.txt, [this.isize = 24.0]);
 
   @override
   Widget build(BuildContext context) {
     //print(isize);
-    if (txt=='Да'){
-    return new Icon(Icons.check,color: Colors.green,size: isize,);
-        }
-        else{
-      return new Icon(Icons.clear,color: Colors.red,size: isize,);
-        }
-
+    if (txt == 'Да') {
+      return new Icon(
+        Icons.check,
+        color: Colors.green,
+        size: isize,
+      );
+    } else {
+      return new Icon(
+        Icons.clear,
+        color: Colors.red,
+        size: isize,
+      );
+    }
   }
 }
-
-
 
 class Group extends StatelessWidget {
   final child;
   final annotation;
 
-  Group(this.child,this.annotation);
+  Group(this.child, this.annotation);
 
   @override
   Widget build(BuildContext context) {
@@ -128,30 +129,35 @@ class Group extends StatelessWidget {
         margin: EdgeInsets.fromLTRB(2.0, 2.0, 3.0, 3.0),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow:[
+          boxShadow: [
             BoxShadow(
               color: Colors.black,
               offset: Offset(1.0, 1.0),
               blurRadius: 5.0,
             ),
-          ] ,
-          border: Border.all(color: Colors.green[900], width: 1.0
-          ),
+          ],
+          border: Border.all(color: Colors.green[900], width: 1.0),
           borderRadius: BorderRadius.all(
             const Radius.circular(3.0),
           ),
         ),
-        child: Column(children:[
-          Row(crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(children: [
+          Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               textDirection: TextDirection.ltr,
-              children:[//Expanded(child:
-              Text(annotation,style:TextStyle(color: Colors.green[900]),overflow: TextOverflow.clip,)
-              //)
-          ]),
-          child])
-    );
+              children: [
+                //Expanded(child:
+                Text(
+                  annotation,
+                  style: TextStyle(color: Colors.green[900]),
+                  overflow: TextOverflow.clip,
+                )
+                //)
+              ]),
+          child
+        ]));
   }
 }
 
@@ -159,7 +165,7 @@ class LGroup extends StatelessWidget {
   final child;
   final annotation;
 
-  LGroup(this.child,this.annotation);
+  LGroup(this.child, this.annotation);
 
   @override
   Widget build(BuildContext context) {
@@ -168,42 +174,43 @@ class LGroup extends StatelessWidget {
         margin: EdgeInsets.fromLTRB(2.0, 2.0, 3.0, 3.0),
         decoration: BoxDecoration(
           color: Colors.amber[50],
-          boxShadow:[
+          boxShadow: [
             BoxShadow(
               color: Colors.black,
               offset: Offset(1.0, 1.0),
               blurRadius: 1.0,
             ),
-          ] ,
-          border: Border.all(color: Colors.green[900], width: 1.0
-          ),
+          ],
+          border: Border.all(color: Colors.green[900], width: 1.0),
           borderRadius: BorderRadius.all(
             const Radius.circular(3.0),
           ),
         ),
-        child: Column(children:[
-          Container(alignment: Alignment(-1.0, 0.0),child: Text(annotation,overflow: TextOverflow.fade,style:TextStyle(color: Colors.green[900]))),
-          child])
-    );
+        child: Column(children: [
+          Container(
+              alignment: Alignment(-1.0, 0.0),
+              child: Text(annotation,
+                  overflow: TextOverflow.fade,
+                  style: TextStyle(color: Colors.green[900]))),
+          child
+        ]));
   }
 }
-
-
 
 class RButton extends StatelessWidget {
   final text;
   final onpressed;
 
-  RButton(this.text,this.onpressed);
+  RButton(this.text, this.onpressed);
 
   @override
   Widget build(BuildContext context) {
     return new RaisedButton(
-        padding: new EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-        color: Colors.orange,
-        onPressed:onpressed,
-        child: Text(text),
-        );
+      padding: new EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+      color: Colors.orange,
+      onPressed: onpressed,
+      child: Text(text),
+    );
   }
 }
 
@@ -211,7 +218,7 @@ class LightButton extends StatelessWidget {
   final text;
   final onpressed;
 
-  LightButton(this.text,this.onpressed);
+  LightButton(this.text, this.onpressed);
 
   @override
   Widget build(BuildContext context) {
@@ -219,9 +226,64 @@ class LightButton extends StatelessWidget {
       padding: new EdgeInsets.fromLTRB(10.0, 3.0, 10.0, 3.0),
       //margin: EdgeInsets.fromLTRB(2.0, 2.0, 3.0, 3.0),
       color: Colors.amber[50],
-      shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(10.0)),
-      onPressed:onpressed,
+      shape: new RoundedRectangleBorder(
+          borderRadius: new BorderRadius.circular(10.0)),
+      onPressed: onpressed,
       child: Text(text),
+    );
+  }
+}
+
+class ChatButtonOff extends StatelessWidget {
+  final text;
+  final messages;
+  final onpressed;
+
+  ChatButtonOff(this.text, this.messages, this.onpressed);
+  var Col;
+
+  @override
+  Widget build(BuildContext context) {
+    Col = (double.parse(messages) > 0.0) ? Colors.amber : Colors.grey[50];
+    return new RaisedButton(
+      padding: new EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+      color: Colors.grey[50],
+      onPressed: onpressed,
+      child: Row(
+        children: <Widget>[
+          Expanded(child: Text(text)),
+          Text(
+            messages,
+            style: TextStyle(fontWeight: FontWeight.bold, backgroundColor: Col),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class ChatButtonOn extends StatelessWidget {
+  final text;
+  final messages;
+  final onpressed;
+
+  ChatButtonOn(this.text, this.messages, this.onpressed);
+  var Col;
+  @override
+  Widget build(BuildContext context) {
+    Col = (double.parse(messages) > 0.0) ? Colors.amber : Colors.green[50];
+    return new RaisedButton(
+      padding: new EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+      color: Colors.green[50],
+      onPressed: onpressed,
+      child: Row(
+        children: <Widget>[
+          Expanded(child: Text(text)),
+          Text(messages,
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, backgroundColor: Col))
+        ],
+      ),
     );
   }
 }
