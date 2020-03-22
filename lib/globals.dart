@@ -19,3 +19,4 @@ var redrawBasketIcon = null, basketKey;
 int missedMessages = 0, missedEmails = 0;
 int missedWebMessages = 0;
 bool authOK = false;
+var redrawreport;

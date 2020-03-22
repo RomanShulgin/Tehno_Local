@@ -18,6 +18,7 @@ import 'Payment.dart';
 import 'Alarms.dart';
 import 'ChatLocal.dart';
 import 'Email.dart';
+import 'reports.dart';
 
 import 'globals.dart' as globals;
 
@@ -25,8 +26,11 @@ void main() => runApp(MyApp());
 
 Future getStoreInstance() async {
   if (globals.storeSet == false) {
-    CacheStore.setPolicy(LRUCachePolicy(maxCount: 200));
-    CacheStore store = await CacheStore.getInstance();
+    //CacheStore.setPolicy(LRUCachePolicy(maxCount: 200));
+    CacheStore store = await CacheStore.getInstance(
+      policy: LRUCachePolicy(maxCount: 200),
+      namespace: 'my_store',
+    );
     globals.store = store;
     globals.storeSet = true;
   }
@@ -56,10 +60,12 @@ class MyApp extends StatelessWidget {
         '/Home': (BuildContext context) => InfoScreen(),
         '/Price': (BuildContext context) => PriceDialog(),
         '/Balance': (BuildContext context) => Balance(),
+        '/Report': (BuildContext context) => Report(),
         '/Contacts': (BuildContext context) => Contacts(),
         '/Order': (BuildContext context) => Order(),
         '/Catalog': (BuildContext context) => Catalog(),
         '/Basket': (BuildContext context) => Basket(),
+        '/Email': (BuildContext context) => EmailForm(),
       },
       debugShowCheckedModeBanner: false,
       title: 'Технопартс',
@@ -169,14 +175,41 @@ class InfoScreenState extends State<InfoScreen> {
 
     _firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
       print('onMessage: $message');
+      if (message['data'] != null) {
+        if (message['data']['type'] == 'Мессенджер') {
+          globals.chatLocalUser = message['data']['author'];
+          onTabTapped(1);
+        } else if (message['data']['type'] == 'МессенджерВеб') {
+          globals.chatWebUser = message['data']['author'];
+          onTabTapped(2);
+        }
+      }
       PopUpInfo(message['notification']['title'],
           message['notification']['body'], context);
       return;
     }, onResume: (Map<String, dynamic> message) {
       print('onResume: $message');
+      if (message['data'] != null) {
+        if (message['data']['type'] == 'Мессенджер') {
+          globals.chatLocalUser = message['data']['author'];
+          onTabTapped(1);
+        } else if (message['data']['type'] == 'МессенджерВеб') {
+          globals.chatWebUser = message['data']['author'];
+          onTabTapped(2);
+        }
+      }
       return;
     }, onLaunch: (Map<String, dynamic> message) {
       print('onLaunch: $message');
+      if (message['data'] != null) {
+        if (message['data']['type'] == 'Мессенджер') {
+          globals.chatLocalUser = message['data']['author'];
+          onTabTapped(1);
+        } else if (message['data']['type'] == 'МессенджерВеб') {
+          globals.chatWebUser = message['data']['author'];
+          onTabTapped(2);
+        }
+      }
       return;
     });
 

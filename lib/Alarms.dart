@@ -34,3 +34,16 @@ Future<void> PopUpDialog(title, text, buttons, context) {
     },
   );
 }
+
+Future<void> PopUpFiles(title, buttons, context) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        //content: Text(text),
+        actions: buttons,
+      );
+    },
+  );
+}
