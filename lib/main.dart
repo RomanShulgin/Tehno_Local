@@ -174,39 +174,78 @@ class InfoScreenState extends State<InfoScreen> {
     _firebaseMessaging.requestNotificationPermissions();
 
     _firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
-      print('onMessage: $message');
-      if (message['data'] != null) {
-        if (message['data']['type'] == 'Мессенджер') {
-          globals.chatLocalUser = message['data']['author'];
+      var mes,mestitle,mesbody;
+      print('onMessage 2: $message');
+
+      if(message['author']!=null){
+        mes=message;
+        mestitle=mes['aps']['alert']['title'];
+        mesbody=mes['aps']['alert']['body'];
+        print('ios');
+      }
+      else{
+        mes=message['data'];
+        mestitle=message['notification']['title'];
+        mesbody=message['notification']['body'];
+        print('adroid');
+      };
+      print('mes'+mes.toString());
+      if (mes != null) {
+        if (mes['type'] == 'Мессенджер') {
+          globals.chatLocalUser = mes['author'];
           onTabTapped(1);
-        } else if (message['data']['type'] == 'МессенджерВеб') {
-          globals.chatWebUser = message['data']['author'];
+        } else if (mes['type'] == 'МессенджерВеб') {
+          globals.chatWebUser = mes['author'];
           onTabTapped(2);
         }
       }
-      PopUpInfo(message['notification']['title'],
-          message['notification']['body'], context);
+      PopUpInfo(mestitle,
+          mesbody, context);
       return;
     }, onResume: (Map<String, dynamic> message) {
       print('onResume: $message');
-      if (message['data'] != null) {
-        if (message['data']['type'] == 'Мессенджер') {
-          globals.chatLocalUser = message['data']['author'];
+      var mes,mestitle,mesbody;
+      if(message['author']!=null){
+        mes=message;
+        mestitle=mes['aps']['alert']['title'];
+        mesbody=mes['aps']['alert']['body'];
+        print('mes'+mes.toString());
+      }
+      else{
+        mes=message['data'];
+        mestitle=message['notification']['title'];
+        mesbody=message['notification']['body'];
+      }
+
+      if (mes != null) {
+        if (mes['type'] == 'Мессенджер') {
+          globals.chatLocalUser = mes['author'];
           onTabTapped(1);
-        } else if (message['data']['type'] == 'МессенджерВеб') {
-          globals.chatWebUser = message['data']['author'];
+        } else if (mes['type'] == 'МессенджерВеб') {
+          globals.chatWebUser = mes['author'];
           onTabTapped(2);
         }
       }
       return;
     }, onLaunch: (Map<String, dynamic> message) {
       print('onLaunch: $message');
-      if (message['data'] != null) {
-        if (message['data']['type'] == 'Мессенджер') {
-          globals.chatLocalUser = message['data']['author'];
+      var mes,mestitle,mesbody;
+      if(message['author']!=null){
+        mes=message;
+        mestitle=mes['aps']['alert']['title'];
+        mesbody=mes['aps']['alert']['body'];
+      }
+      else{
+        mes=message['data'];
+        mestitle=message['notification']['title'];
+        mesbody=message['notification']['body'];
+      }
+      if (mes != null) {
+        if (mes['type'] == 'Мессенджер') {
+          globals.chatLocalUser = mes['author'];
           onTabTapped(1);
-        } else if (message['data']['type'] == 'МессенджерВеб') {
-          globals.chatWebUser = message['data']['author'];
+        } else if (mes['type'] == 'МессенджерВеб') {
+          globals.chatWebUser = mes['author'];
           onTabTapped(2);
         }
       }

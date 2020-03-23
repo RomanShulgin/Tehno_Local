@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>555650846785-gt60d2v9b9bc183iugma4ne8133cbnka.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.555650846785-gt60d2v9b9bc183iugma4ne8133cbnka</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>555650846785-lenpr18snhea1gj2qim5jb1ctj00org4.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBZ62m8YwU5EwFlXhfzypE0HuQGw6eeBxI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>555650846785</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.tehnoparts.localapp</string>
+	<key>PROJECT_ID</key>
+	<string>tehnopartslocal</string>
+	<key>STORAGE_BUCKET</key>
+	<string>tehnopartslocal.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:555650846785:ios:dc5dca3e21b0afb4a076c0</string>
+	<key>DATABASE_URL</key>
+	<string>https://tehnopartslocal.firebaseio.com</string>
+</dict>
+</plist>
