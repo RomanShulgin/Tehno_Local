@@ -19,6 +19,7 @@ import 'Alarms.dart';
 import 'ChatLocal.dart';
 import 'Email.dart';
 import 'reports.dart';
+import 'BarcodeModule.dart';
 
 import 'globals.dart' as globals;
 
@@ -66,6 +67,8 @@ class MyApp extends StatelessWidget {
         '/Catalog': (BuildContext context) => Catalog(),
         '/Basket': (BuildContext context) => Basket(),
         '/Email': (BuildContext context) => EmailForm(),
+        '/Barcode': (BuildContext context) => Barcode(),
+        '/BarDoc': (BuildContext context) => BarDoc(),
       },
       debugShowCheckedModeBanner: false,
       title: 'Технопартс',
@@ -174,22 +177,22 @@ class InfoScreenState extends State<InfoScreen> {
     _firebaseMessaging.requestNotificationPermissions();
 
     _firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
-      var mes,mestitle,mesbody;
+      var mes, mestitle, mesbody;
       print('onMessage 2: $message');
 
-      if(message['author']!=null){
-        mes=message;
-        mestitle=mes['aps']['alert']['title'];
-        mesbody=mes['aps']['alert']['body'];
+      if (message['author'] != null) {
+        mes = message;
+        mestitle = mes['aps']['alert']['title'];
+        mesbody = mes['aps']['alert']['body'];
         print('ios');
-      }
-      else{
-        mes=message['data'];
-        mestitle=message['notification']['title'];
-        mesbody=message['notification']['body'];
+      } else {
+        mes = message['data'];
+        mestitle = message['notification']['title'];
+        mesbody = message['notification']['body'];
         print('adroid');
-      };
-      print('mes'+mes.toString());
+      }
+      ;
+      print('mes' + mes.toString());
       if (mes != null) {
         if (mes['type'] == 'Мессенджер') {
           globals.chatLocalUser = mes['author'];
@@ -199,22 +202,20 @@ class InfoScreenState extends State<InfoScreen> {
           onTabTapped(2);
         }
       }
-      PopUpInfo(mestitle,
-          mesbody, context);
+      PopUpInfo(mestitle, mesbody, context);
       return;
     }, onResume: (Map<String, dynamic> message) {
       print('onResume: $message');
-      var mes,mestitle,mesbody;
-      if(message['author']!=null){
-        mes=message;
-        mestitle=mes['aps']['alert']['title'];
-        mesbody=mes['aps']['alert']['body'];
-        print('mes'+mes.toString());
-      }
-      else{
-        mes=message['data'];
-        mestitle=message['notification']['title'];
-        mesbody=message['notification']['body'];
+      var mes, mestitle, mesbody;
+      if (message['author'] != null) {
+        mes = message;
+        mestitle = mes['aps']['alert']['title'];
+        mesbody = mes['aps']['alert']['body'];
+        print('mes' + mes.toString());
+      } else {
+        mes = message['data'];
+        mestitle = message['notification']['title'];
+        mesbody = message['notification']['body'];
       }
 
       if (mes != null) {
@@ -229,16 +230,15 @@ class InfoScreenState extends State<InfoScreen> {
       return;
     }, onLaunch: (Map<String, dynamic> message) {
       print('onLaunch: $message');
-      var mes,mestitle,mesbody;
-      if(message['author']!=null){
-        mes=message;
-        mestitle=mes['aps']['alert']['title'];
-        mesbody=mes['aps']['alert']['body'];
-      }
-      else{
-        mes=message['data'];
-        mestitle=message['notification']['title'];
-        mesbody=message['notification']['body'];
+      var mes, mestitle, mesbody;
+      if (message['author'] != null) {
+        mes = message;
+        mestitle = mes['aps']['alert']['title'];
+        mesbody = mes['aps']['alert']['body'];
+      } else {
+        mes = message['data'];
+        mestitle = message['notification']['title'];
+        mesbody = message['notification']['body'];
       }
       if (mes != null) {
         if (mes['type'] == 'Мессенджер') {

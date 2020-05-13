@@ -102,8 +102,8 @@ class IdentFormState extends State<IdentForm> {
         globals.password = post.password;
         globals.user = post.user;
         globals.curdate = new DateTime.now();
-        globals.datefrom =
-            new DateTime(globals.curdate.year, globals.curdate.month, 1);
+        globals.datefrom = new DateTime(globals.curdate.year,
+            globals.curdate.month, globals.curdate.day - 1);
         globals.dateto = globals.curdate;
         storeUser();
         Navigator.pushNamed(context, '/Home');

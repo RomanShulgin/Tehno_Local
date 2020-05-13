@@ -56,6 +56,22 @@ class HomeScreenState extends State<HomeScreen> {
     Navigator.pushNamed(context, '/Balance');
   }
 
+  Widget Functions() {
+    List func = List();
+    func.add(ButtonDecorated(
+        'Штрих',
+        Icon(
+          Icons.settings_remote,
+          size: 30.0,
+        ), () {
+      Navigator.pushNamed(context, '/Barcode');
+    }));
+    return ContRaised(ExpansionTile(
+      title: Text('Функционал'),
+      children: [ButtonTab(3, func)],
+    ));
+  }
+
   Widget build(BuildContext context) {
     globals.tabredraw[0] = redraw;
     if (name == 'Неопределено') {
@@ -72,7 +88,8 @@ class HomeScreenState extends State<HomeScreen> {
               Column(children: warningList) //Text('Ok')//
               ,
               'Уведомления'),
-          Group(ReportList(), 'Отчеты'),
+          Functions(),
+          ReportList(),
         ])),
       ],
     );

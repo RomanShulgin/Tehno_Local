@@ -18,12 +18,18 @@ class ReportListState extends State {
   bool isloading = true;
   var data;
 
-  List reportList() {
+  Widget reportList() {
     List<Widget> Reports = new List();
     for (var el in data['Отчеты']) {
-      Reports.add(ReportButton(el));
+      Reports.add(ReportButton(
+          el,
+          new Icon(
+            Icons.description,
+            size: 30.0,
+          )));
     }
-    return Reports;
+
+    return ButtonTab(3, Reports);
   }
 
   Future GetActualReports() async {
@@ -45,22 +51,58 @@ class ReportListState extends State {
       GetActualReports();
       return LinearProgressIndicator();
     } else {
-      return Column(
-        children: reportList(),
+      return ContRaised(
+        ExpansionTile(
+          //backgroundColor: Colors.amber[50],
+          title: Text(
+            'Отчеты',
+          ),
+          children: [
+            reportList(),
+          ],
+        ),
       );
     }
     ;
   }
 }
 
-class ReportButton extends StatelessWidget {
+class ReportButton2 extends StatelessWidget {
   final data;
-  ReportButton(this.data);
+  ReportButton2(this.data);
   Widget build(BuildContext context) {
     return LightButton(data['Заголовок'], () {
       print('report');
       Navigator.pushNamed(context, '/Report', arguments: data);
     });
+  }
+}
+
+class ReportButton extends StatelessWidget {
+  final data;
+  final icon;
+
+  ReportButton(this.data, this.icon);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: new RaisedButton(
+        padding: new EdgeInsets.fromLTRB(10.0, 3.0, 10.0, 3.0),
+        //margin: EdgeInsets.fromLTRB(2.0, 2.0, 3.0, 3.0),
+        color: Colors.amber[50],
+        shape: new RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(10.0)),
+        onPressed: () {
+          print('report');
+          Navigator.pushNamed(context, '/Report', arguments: data);
+        },
+        child: Column(
+          children: <Widget>[icon, Text(data['Заголовок'])],
+        ),
+      ),
+    );
   }
 }
 

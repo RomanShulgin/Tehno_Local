@@ -20,6 +20,30 @@ class ContP extends StatelessWidget {
   }
 }
 
+class ContColorSmall extends StatelessWidget {
+  final child;
+  final color;
+
+  ContColorSmall(this.child, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: new Container(
+          constraints: BoxConstraints.expand(height: 60.0),
+          padding: new EdgeInsets.fromLTRB(4.0, 1.0, 4.0, 1.0),
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(color: Colors.green[900], width: 2.0),
+            borderRadius: BorderRadius.all(
+              const Radius.circular(8.0),
+            ),
+          ),
+          child: child),
+    );
+  }
+}
+
 class ContSmall extends StatelessWidget {
   final child;
 
@@ -33,6 +57,48 @@ class ContSmall extends StatelessWidget {
           color: Colors.white,
         ),
         child: child);
+  }
+}
+
+class ButtonTab extends StatelessWidget {
+  final columns;
+  List buttons;
+
+  ButtonTab(this.columns, this.buttons);
+
+  Widget build(BuildContext context) {
+    List<TableRow> widgetrows = new List();
+    Map<int, TableColumnWidth> wights = new Map();
+    for (var i = 0; i <= columns - 1; i++) {
+      wights[i] = FlexColumnWidth(1.0);
+    }
+    int numbuttons = buttons.length;
+    List<Widget> listRow = new List();
+    int d = 0;
+    for (var i = 1; i <= numbuttons; i++) {
+      if (d == 0) {
+        listRow.clear();
+      }
+      listRow.add(buttons[i - 1]);
+
+      if (d == (columns - 1) || i == numbuttons) {
+        for (var t = d; t <= (columns - 2); t++) {
+          listRow.add(Container());
+          //добиваем последний ряд
+        }
+        List<Widget> currentRow = new List.from(listRow);
+        var tr = TableRow(children: currentRow);
+        widgetrows.add(tr);
+        listRow.clear();
+        d = 0;
+      } else
+        d++;
+    }
+
+    return new Table(
+      columnWidths: wights,
+      children: widgetrows,
+    );
   }
 }
 
@@ -51,6 +117,60 @@ class ContSmallBorder extends StatelessWidget {
           border: Border.all(color: Colors.green[900], width: 2.0),
           borderRadius: BorderRadius.all(
             const Radius.circular(8.0),
+          ),
+        ),
+        child: child);
+  }
+}
+
+class ButtonDecorated extends StatelessWidget {
+  final text;
+  final function;
+  final icon;
+
+  ButtonDecorated(this.text, this.icon, this.function);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: new RaisedButton(
+        padding: new EdgeInsets.fromLTRB(10.0, 3.0, 10.0, 3.0),
+        //margin: EdgeInsets.fromLTRB(2.0, 2.0, 3.0, 3.0),
+        color: Colors.amber[50],
+        shape: new RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(10.0)),
+        onPressed: function,
+        child: Column(
+          children: <Widget>[icon, Text(text)],
+        ),
+      ),
+    );
+  }
+}
+
+class ContRaised extends StatelessWidget {
+  final child;
+
+  ContRaised(this.child);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+        padding: new EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+        margin: EdgeInsets.fromLTRB(2.0, 2.0, 3.0, 3.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black,
+              offset: Offset(1.0, 1.0),
+              blurRadius: 5.0,
+            ),
+          ],
+          border: Border.all(color: Colors.green[900], width: 1.0),
+          borderRadius: BorderRadius.all(
+            const Radius.circular(3.0),
           ),
         ),
         child: child);
@@ -100,7 +220,7 @@ class Check extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //print(isize);
-    if (txt == 'Да') {
+    if (txt == 'Да' || txt == true) {
       return new Icon(
         Icons.check,
         color: Colors.green,
