@@ -548,6 +548,7 @@ class bottomBar extends StatelessWidget {
   bottomBar(this.number);
   String number;
   final txt1 = TextEditingController();
+  final sendto = TextEditingController();
   SendReply(context) async {
     var post = new Post1c();
     post.metod = "sendreply";
@@ -578,34 +579,101 @@ class bottomBar extends StatelessWidget {
     }
   }
 
+  SendForward(context) async {
+    var post = new Post1c();
+    post.metod = "sendforward";
+    var jsontext = txt1.text; //json.encode(globals.basket);
+    print(jsontext);
+    post.input = '?number=' + number + '&adress=' + sendto.text;
+    await post.HttpPost(jsontext);
+    var jsont = post.text;
+    if (post.state == 'ok') {
+      var data = jsonDecode(jsont)['Сообщение'];
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Письмо переслано'),
+            content: Text('Переслано письмо №' + data['Номер']),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   Widget build(context) {
-    return LightButton('Написать ответ', () {
-      print('showBottom');
-      showBottomSheet(
-          context: context,
-          builder: (context) => Column(
-                children: <Widget>[
-                  Group(
-                      TextFormField(
-                        controller: txt1,
-                        maxLines: null,
-                        //expands: true,
-                        minLines: null,
-                      ),
-                      'Текст ответа'),
-                  Row(
+    return Row(
+      children: <Widget>[
+        ContSmall(LightButton('Написать ответ', () {
+          print('showBottom');
+          showBottomSheet(
+              context: context,
+              builder: (context) => Column(
                     children: <Widget>[
-                      LightButton('Отправить', () {
-                        SendReply(context);
-                        //Navigator.pop(context);
-                      }),
-                      LightButton('Закрыть', () {
-                        Navigator.pop(context);
-                      })
+                      Group(
+                          TextFormField(
+                            controller: txt1,
+                            maxLines: null,
+                            //expands: true,
+                            minLines: null,
+                          ),
+                          'Текст ответа'),
+                      Row(
+                        children: <Widget>[
+                          LightButton('Отправить', () {
+                            SendReply(context);
+                            //Navigator.pop(context);
+                          }),
+                          LightButton('Закрыть', () {
+                            Navigator.pop(context);
+                          })
+                        ],
+                      )
                     ],
-                  )
-                ],
-              ));
-    });
+                  ));
+        })),
+        ContSmall(LightButton('Переслать', () {
+          print('showBottom');
+          showBottomSheet(
+              context: context,
+              builder: (context) => Column(
+                    children: <Widget>[
+                      Group(
+                          TextFormField(
+                            controller: sendto,
+                          ),
+                          'Адресат'),
+                      Group(
+                          TextFormField(
+                            controller: txt1,
+                            maxLines: null,
+                            //expands: true,
+                            minLines: null,
+                          ),
+                          'Текст ответа'),
+                      Row(
+                        children: <Widget>[
+                          LightButton('Отправить', () {
+                            SendForward(context);
+                            //Navigator.pop(context);
+                          }),
+                          LightButton('Закрыть', () {
+                            Navigator.pop(context);
+                          })
+                        ],
+                      )
+                    ],
+                  ));
+        })),
+      ],
+    );
   }
 }

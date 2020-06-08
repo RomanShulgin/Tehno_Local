@@ -718,6 +718,9 @@ class GoodsBarState extends State<GoodsBar> {
       print(widget.code);
       var data = getParam(json, "Данные");
       var name = data['Номенклатура'];
+      var txt2 = TextEditingController();
+      //txt2.
+      txt2.text = '1';
       return Container(
           child: SingleChildScrollView(
               child: Column(
@@ -732,20 +735,34 @@ class GoodsBarState extends State<GoodsBar> {
               "Ячейки"),
           Group(Text(data['Количество'].toString()), "Количество"),
           Group(Text(data['Подобрано'].toString()), "Подобрано"),
-          Row(
-            children: <Widget>[
-              Group(
-                  RButton("+1", () {
-                    addtsd(1, data);
-                  }),
-                  'Штучно'),
-              Group(
-                  RButton(data['Кратность'].toString(), () {
-                    addtsd(data['Кратность'], data);
-                  }),
-                  "Коробка")
-            ],
-          )
+          LGroup(
+              Column(
+                children: <Widget>[
+                  ContSmall(TextFormField(
+                    controller: txt2,
+                    obscureText: false,
+                    keyboardType: TextInputType.number,
+                  )),
+                  Row(
+                    children: <Widget>[
+                      ContSmall(
+                        RButton("Штук", () {
+                          addtsd(int.tryParse(txt2.text) ?? 0, data);
+                        }),
+                      ),
+                      ContSmall(
+                        RButton('Коробок', () {
+                          addtsd(
+                              data['Кратность'] * int.tryParse(txt2.text) ?? 0,
+                              data);
+                        }),
+                      )
+                    ],
+                  )
+                ],
+              ),
+              "Количество"),
+
           /*RButton('Назад', () {
               Navigator.of(context).pop();
             })*/
