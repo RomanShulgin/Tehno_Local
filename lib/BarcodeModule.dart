@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import 'HTTPExchange.dart';
 import 'Alarms.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,7 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'Goods.dart';
+import 'package:cupertino_icons/cupertino_icons.dart';
 
 class Barcode extends StatefulWidget {
   @override
@@ -363,13 +366,18 @@ class BarcodeState extends State {
 
   Widget build(BuildContext context) {
     globals.barcoderedraw = onTabTapped;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         // leading: IconButton(icon: new Icon(Icons.menu), onPressed: () {}),
         title: Text('Штрихкоды'),
         actions: <Widget>[
-          new LightButton('SCAN', () {
+          new iconButton(
+              new Icon(
+                CupertinoIcons.barcode_viewfinder,
+                size: 40.0,
+              ), () {
             Scan();
           }),
           new IconButton(
@@ -389,7 +397,7 @@ class BarcodeState extends State {
           items: [
             new BottomNavigationBarItem(
               icon: new Icon(Icons.home),
-              title: new Text("Главная"),
+              title: new Text("Типы документов"),
             ),
             new BottomNavigationBarItem(
               icon: new Icon(
@@ -411,6 +419,7 @@ class BarDocState extends State {
   var json;
   Map struct;
   var data;
+  bool rescan = false;
 
   Future getdata() async {
     var post = new Post1c();
@@ -421,6 +430,7 @@ class BarDocState extends State {
         struct['Номер'] +
         '&date=' +
         struct['Дата'];
+
     await post.HttpGet();
     json = post.text;
     isloading = false;
@@ -428,47 +438,53 @@ class BarDocState extends State {
   }
 
   Future Scan() async {
-    try {
-      String barcode = await BarcodeScanner.scan();
-      //PopUpInfo('Штрихкод', barcode, context);
+    var rescan = true;
+    while (rescan) {
+      rescan = false;
+      try {
+        String barcode = await BarcodeScanner.scan();
+        //PopUpInfo('Штрихкод', barcode, context);
 
-      var post = new Post1c();
-      post.metod = "findbargoodindoc";
-      post.input = '?barcode=' +
-          barcode +
-          '&doctype=' +
-          data['Тип'] +
-          '&id=' +
-          data['Ид'];
+        var post = new Post1c();
+        post.metod = "findbargoodindoc";
+        post.input = '?barcode=' +
+            barcode +
+            '&doctype=' +
+            data['Тип'] +
+            '&id=' +
+            data['Ид'];
 
-      await post.HttpGet();
-      var json = post.text;
-      var res = getParam(json, "Найдено");
-      if (!res)
-        PopUpInfo('Штрихкод', barcode + ' в документе не найден!', context);
-      else {
-        dialogGoodsBar(getParam(json, "Данные")['Код'], data, renew, context);
-      }
-      //isloading = false;
+        await post.HttpGet();
+        var json = post.text;
+        var res = getParam(json, "Найдено");
+        if (!res)
+          PopUpInfo('Штрихкод', barcode + ' в документе не найден!', context);
+        else {
+          rescan = await dialogGoodsBar(
+              getParam(json, "Данные")['Код'], data, renew, context);
+          //print('Rescan ' + rescan.toString());
+        }
+        //isloading = false;
 
-      //setState(() => this.barcode = barcode);
-    } on PlatformException catch (e) {
-      if (e.code == BarcodeScanner.CameraAccessDenied) {
-        setState(() {
-          PopUpInfo('Ошибка сканера',
-              'The user did not grant the camera permission!', context);
-          //this.barcode = 'The user did not grant the camera permission!';
-        });
-      } else {
+        //setState(() => this.barcode = barcode);
+      } on PlatformException catch (e) {
+        if (e.code == BarcodeScanner.CameraAccessDenied) {
+          setState(() {
+            PopUpInfo('Ошибка сканера',
+                'The user did not grant the camera permission!', context);
+            //this.barcode = 'The user did not grant the camera permission!';
+          });
+        } else {
+          PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
+          //setState(() => this.barcode = 'Unknown error: $e');
+        }
+      } on FormatException {
+        /*setState(() => this.barcode =
+      'null (User returned using the "back"-button before scanning anything. Result)');*/
+      } catch (e) {
         PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
         //setState(() => this.barcode = 'Unknown error: $e');
       }
-    } on FormatException {
-      /*setState(() => this.barcode =
-      'null (User returned using the "back"-button before scanning anything. Result)');*/
-    } catch (e) {
-      PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
-      //setState(() => this.barcode = 'Unknown error: $e');
     }
   }
 
@@ -480,6 +496,10 @@ class BarDocState extends State {
 
   void opennom(data) {
     dialogGoodsCard(data['Код'], 'Coded', context);
+  }
+
+  void openmark(code, data) {
+    dialogMarks(code, data, renew, context);
   }
 
   List nomList(data) {
@@ -507,15 +527,40 @@ class BarDocState extends State {
       TableCell(
           child: Column(
         children: <Widget>[
-          Center(child: Text('Кол-во', textScaleFactor: 1.0)),
-          Center(child: Text('Подбор', textScaleFactor: 1.0))
+          Center(child: Text('Кол.', textScaleFactor: 1.0)),
+          Center(child: Text('Подб.', textScaleFactor: 1.0))
         ],
       )),
+      (data['Тип'] == 'real')
+          ? (TableCell(
+              child: Center(
+                  child: Text(
+                'Мар.',
+                textScaleFactor: 1.0,
+              )),
+            ))
+          : TableCell(
+              child: Container(),
+            ),
     ]));
     for (var doc in data['Товары']) {
+      var markBcolor;
+      var markcolor;
       var color = (doc['Количество'] == doc['Подобрано'])
           ? Colors.lightGreenAccent
           : Colors.transparent;
+      if (doc['Количество'] == doc['Маркировано']) {
+        markBcolor = Colors.lightGreenAccent;
+        markcolor = Colors.black;
+      } else {
+        markBcolor = Colors.transparent;
+        if (doc['ЕстьМаркировки']) {
+          markcolor = Colors.black;
+          markBcolor = Colors.amberAccent;
+        } else
+          markcolor = Colors.grey[300];
+      }
+
       bordersList.add(TableRow(children: [
         TableCell(
             child: InkWell(
@@ -552,6 +597,22 @@ class BarDocState extends State {
             opennom(doc);
           },
         )),
+        (data['Тип'] == 'real')
+            ? TableCell(
+                child: InkWell(
+                child: ContColorSmall(
+                    Icon(
+                      CupertinoIcons.barcode,
+                      color: markcolor,
+                    ),
+                    markBcolor),
+                onTap: () {
+                  openmark(doc['Код'], data);
+                },
+              ))
+            : TableCell(
+                child: Container(),
+              ),
       ]));
     }
     return bordersList;
@@ -563,6 +624,22 @@ class BarDocState extends State {
       return LinearProgressIndicator();
     } else {
       data = getParam(json, 'Данные');
+      var colwid; // = new Map();
+      if (data['Тип'] == 'real') {
+        colwid = {
+          0: FlexColumnWidth(0.8),
+          1: FlexColumnWidth(1.4),
+          2: FlexColumnWidth(0.5),
+          3: FlexColumnWidth(0.5),
+        };
+      } else {
+        colwid = {
+          0: FlexColumnWidth(0.8),
+          1: FlexColumnWidth(1.4),
+          2: FlexColumnWidth(0.5),
+          3: FlexColumnWidth(0.01),
+        };
+      }
       return Column(
         children: <Widget>[
           Row(children: [
@@ -575,11 +652,7 @@ class BarDocState extends State {
             //height: 500.0,
             child: ListView(children: [
               Table(
-                columnWidths: {
-                  0: FlexColumnWidth(0.8),
-                  1: FlexColumnWidth(1.4),
-                  2: FlexColumnWidth(0.8),
-                },
+                columnWidths: colwid,
                 border: TableBorder.all(),
                 children: nomList(data),
               ),
@@ -592,13 +665,15 @@ class BarDocState extends State {
 
   Widget build(BuildContext context) {
     struct = ModalRoute.of(context).settings.arguments;
+    print(rescan);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         // leading: IconButton(icon: new Icon(Icons.menu), onPressed: () {}),
         title: Text('Документ'),
         actions: <Widget>[
-          new LightButton('SCAN', () {
+          iconButton(new Icon(CupertinoIcons.barcode_viewfinder, size: 40.0),
+              () {
             Scan();
           }),
           new IconButton(
@@ -614,9 +689,9 @@ class BarDocState extends State {
   }
 }
 
-void dialogGoodsBar(code, struct, renew, context) {
+Future dialogGoodsBar(code, struct, renew, context) {
   // flutter defined function
-  showDialog(
+  return showDialog(
     context: context,
     builder: (BuildContext context) {
       // return object of type Dialog
@@ -649,6 +724,7 @@ class GoodsBarState extends State<GoodsBar> {
   bool isloading = true;
   var json;
   var struct;
+  var scrollController = new ScrollController();
 
   Future showGoodsCard(code) async {
     var post = new Post1c();
@@ -673,7 +749,15 @@ class GoodsBarState extends State<GoodsBar> {
     return listparams;
   }
 
-  void addtsd(int col, data) async {
+  void moveGoodsBarDown(String change) {
+    print('goin down');
+    scrollController.animateTo(70,
+        duration: Duration(milliseconds: 500), curve: Curves.linear);
+    scrollController.animateTo(70,
+        duration: Duration(milliseconds: 500), curve: Curves.linear);
+  }
+
+  void addtsd(int col, data, {contscan = false}) async {
     int amount = data['Количество'] - data['Подобрано'];
     if (col > amount) {
       await PopUpInfo(
@@ -700,7 +784,7 @@ class GoodsBarState extends State<GoodsBar> {
 
       //setState(() {});
     }
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(contscan);
   }
 
   Widget build(BuildContext context) {
@@ -723,51 +807,301 @@ class GoodsBarState extends State<GoodsBar> {
       txt2.text = '1';
       return Container(
           child: SingleChildScrollView(
+              controller: scrollController,
               child: Column(
-        children: [
-          Group(Text(data['Код']), "Код"),
-          LGroup(Text(name),
-              "Наименование"), //getParam(json,"Наименование")),"Наименование"),
-          Group(
-              Column(
-                children: cellList(data['Ячейка']),
-              ),
-              "Ячейки"),
-          Group(Text(data['Количество'].toString()), "Количество"),
-          Group(Text(data['Подобрано'].toString()), "Подобрано"),
-          LGroup(
-              Column(
-                children: <Widget>[
-                  ContSmall(TextFormField(
-                    controller: txt2,
-                    obscureText: false,
-                    keyboardType: TextInputType.number,
-                  )),
-                  Row(
-                    children: <Widget>[
-                      ContSmall(
-                        RButton("Штук", () {
-                          addtsd(int.tryParse(txt2.text) ?? 0, data);
-                        }),
+                children: [
+                  Group(Text(data['Код']), "Код"),
+                  LGroup(Text(name),
+                      "Наименование"), //getParam(json,"Наименование")),"Наименование"),
+                  Group(
+                      Column(
+                        children: cellList(data['Ячейка']),
                       ),
-                      ContSmall(
-                        RButton('Коробок', () {
-                          addtsd(
-                              data['Кратность'] * int.tryParse(txt2.text) ?? 0,
-                              data);
-                        }),
-                      )
-                    ],
-                  )
-                ],
-              ),
-              "Количество"),
+                      "Ячейки"),
+                  Group(Text(data['Количество'].toString()), "Количество"),
+                  Group(Text(data['Подобрано'].toString()), "Подобрано"),
+                  LGroup(
+                      Column(
+                        children: <Widget>[
+                          ContSmall(TextFormField(
+                            controller: txt2,
+                            obscureText: false,
+                            onTap: () {
+                              moveGoodsBarDown('');
+                            },
+                            onChanged: (dt) {
+                              moveGoodsBarDown('changed');
+                            },
+                            keyboardType: TextInputType.number,
+                          )),
+                          Row(
+                            children: <Widget>[
+                              ContSmall(
+                                RButton("Штук", () {
+                                  addtsd(int.tryParse(txt2.text) ?? 0, data);
+                                }),
+                              ),
+                              ContSmall(
+                                RButton('Коробок', () {
+                                  addtsd(
+                                      data['Кратность'] *
+                                              int.tryParse(txt2.text) ??
+                                          0,
+                                      data);
+                                }),
+                              )
+                            ],
+                          ),
+                          Row(
+                            children: <Widget>[
+                              ContSmall(
+                                RButton("Шт.+Скан", () {
+                                  addtsd(int.tryParse(txt2.text) ?? 0, data,
+                                      contscan: true);
+                                }),
+                              ),
+                              ContSmall(
+                                RButton('Кор.+Скан', () {
+                                  addtsd(
+                                      data['Кратность'] *
+                                              int.tryParse(txt2.text) ??
+                                          0,
+                                      data,
+                                      contscan: true);
+                                }),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                      "Количество"),
 
-          /*RButton('Назад', () {
+                  /*RButton('Назад', () {
               Navigator.of(context).pop();
             })*/
+                ],
+              )));
+    }
+  }
+}
+
+void dialogMarks(code, struct, renew, context) {
+  // flutter defined function
+  print('Dialog');
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      // return object of type Dialog
+      return AlertDialog(
+        title: new Text("Номенклатура"),
+        content: Marks(code, struct),
+        actions: <Widget>[
+          // usually buttons at the bottom of the dialog
+          new FlatButton(
+            child: new Text("Close"),
+            onPressed: () {
+              renew();
+              Navigator.of(context).pop();
+            },
+          ),
         ],
-      )));
+      );
+    },
+  );
+}
+
+class Marks extends StatefulWidget {
+  var code, struct;
+  Marks(this.code, this.struct);
+  @override
+  createState() => new MarksState();
+}
+
+class MarksState extends State<Marks> {
+  bool isloading = true;
+  var json;
+  var struct;
+  var scrollController = new ScrollController();
+
+  Future showGoodsCard(code) async {
+    var post = new Post1c();
+    post.metod = "docgoodmarks";
+    post.input =
+        '?doctype=' + struct['Тип'] + '&id=' + struct['Ид'] + '&code=' + code;
+    await post.HttpGet();
+    json = post.text;
+    isloading = false;
+    setState(() {});
+  }
+
+  Future ScanMark(code, mark) async {
+    try {
+      String barcode = await BarcodeScanner.scan();
+      //PopUpInfo('Штрихкод', barcode, context);
+
+      var post = new Post1c();
+      post.metod = "addmark";
+      post.input = '?barcode=' +
+          barcode +
+          '&doctype=' +
+          struct['Тип'] +
+          '&id=' +
+          struct['Ид'] +
+          '&oldmark=' +
+          mark +
+          '&code=' +
+          code;
+
+      await post.HttpGet();
+      var Ljson = post.text;
+      var res = getParam(Ljson, "Найдено");
+      if (!res)
+        PopUpInfo(
+            'Штрихкод', barcode + getParam(Ljson, "СтатусПоиска"), context);
+      else {
+        PopUpInfo('Штрихкод', getParam(Ljson, "СтатусПоиска"), context);
+        //json=Ljson;
+        isloading = true;
+        setState(() {});
+      }
+      //isloading = false;
+
+      //setState(() => this.barcode = barcode);
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          PopUpInfo('Ошибка сканера',
+              'The user did not grant the camera permission!', context);
+          //this.barcode = 'The user did not grant the camera permission!';
+        });
+      } else {
+        PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
+        //setState(() => this.barcode = 'Unknown error: $e');
+      }
+    } on FormatException {
+      /*setState(() => this.barcode =
+      'null (User returned using the "back"-button before scanning anything. Result)');*/
+    } catch (e) {
+      PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
+      //setState(() => this.barcode = 'Unknown error: $e');
+    }
+  }
+
+  List cellList(data) {
+    var params;
+    var listparams = new List<Widget>();
+
+    var num = data['Всего'];
+    var over = num - data['Маркировано'];
+    var code = data['Код'];
+    var bordersList = new List<TableRow>();
+    bordersList.add(
+        TableRow(decoration: BoxDecoration(color: Colors.amber[50]), children: [
+      TableCell(
+          child: Center(
+        child: Text(
+          'Маркировка',
+          textScaleFactor: 1.0,
+        ),
+      )),
+      TableCell(
+          child: Center(
+        child: Text(
+          'C',
+          textScaleFactor: 1.0,
+        ),
+      )),
+    ]));
+
+    for (var marking in data['Маркировки']) {
+      bordersList.add(TableRow(
+          decoration: BoxDecoration(color: Colors.grey[50]),
+          children: [
+            TableCell(
+                child: Center(
+              child: Text(
+                marking['Маркировка'],
+                textScaleFactor: 1.0,
+              ),
+            )),
+            TableCell(
+                child: Center(
+                    child:
+                        iconButton(Icon(CupertinoIcons.barcode_viewfinder), () {
+              ScanMark(code, marking['Маркировка']);
+            }))),
+          ]));
+    }
+    for (var i = 1; i <= over; i++)
+      bordersList.add(TableRow(
+          decoration: BoxDecoration(color: Colors.grey[50]),
+          children: [
+            TableCell(
+                child: Center(
+              child: Text(
+                '',
+                textScaleFactor: 1.0,
+              ),
+            )),
+            TableCell(
+                child: Center(
+                    child:
+                        iconButton(Icon(CupertinoIcons.barcode_viewfinder), () {
+              ScanMark(code, '');
+              isloading = true;
+              setState(() {});
+            }))),
+          ]));
+
+    return bordersList;
+  }
+
+  Widget build(BuildContext context) {
+    var colwid = {
+      0: FlexColumnWidth(2.0),
+      1: FlexColumnWidth(0.5),
+    };
+
+    print(isloading);
+    if (isloading) {
+      struct = widget.struct;
+      print('Структура ');
+      print(struct);
+      showGoodsCard(widget.code);
+      return Container(
+          child: Column(
+        children: [
+          LinearProgressIndicator(),
+        ],
+      ));
+    } else {
+      print(widget.code);
+      var data = getParam(json, "Данные");
+      var name = data['Наименование'];
+      var txt2 = TextEditingController();
+      //txt2.
+      txt2.text = '1';
+      return Container(
+          child: SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                children: [
+                  Group(Text(data['Код']), "Код"),
+                  LGroup(Text(name),
+                      "Наименование"), //getParam(json,"Наименование")),"Наименование"),
+                  Group(
+                      Table(
+                        columnWidths: colwid,
+                        border: TableBorder.all(),
+                        children: cellList(data),
+                      ),
+                      "Маркировки"),
+
+                  /*RButton('Назад', () {
+              Navigator.of(context).pop();
+            })*/
+                ],
+              )));
     }
   }
 }

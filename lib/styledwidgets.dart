@@ -149,6 +149,31 @@ class ButtonDecorated extends StatelessWidget {
   }
 }
 
+class iconButton extends StatelessWidget {
+  final function;
+  final icon;
+
+  iconButton(this.icon, this.function);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: new RaisedButton(
+        padding: new EdgeInsets.fromLTRB(10.0, 3.0, 10.0, 3.0),
+        //margin: EdgeInsets.fromLTRB(2.0, 2.0, 3.0, 3.0),
+        color: Colors.amber[50],
+        shape: new RoundedRectangleBorder(
+            borderRadius: new BorderRadius.circular(10.0)),
+        onPressed: function,
+        child: Column(
+          children: <Widget>[icon],
+        ),
+      ),
+    );
+  }
+}
+
 class ContRaised extends StatelessWidget {
   final child;
 
