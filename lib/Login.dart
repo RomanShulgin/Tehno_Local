@@ -121,7 +121,6 @@ class IdentFormState extends State<IdentForm> {
     ;
 
     return Scaffold(
-        resizeToAvoidBottomPadding: false,
         appBar: AppBar(title: Text('Авторизация')),
         body: Center(
             child: ListView(children: [

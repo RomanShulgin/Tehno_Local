@@ -3,6 +3,23 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'globals.dart' as globals;
 
+Future<String> getIP() async {
+  try {
+    const url = 'https://api.ipify.org';
+    var response = await http.get(url);
+    if (response.statusCode == 200) {
+      print(response.body);
+      return response.body;
+    } else {
+      print(response.body);
+      return null;
+    }
+  } catch (exception) {
+    print(exception);
+    return null;
+  }
+}
+
 getParam(String JsonString, String param) {
   //print('JSON' +JsonString);
   //JsonString= '{"Контрагент":"Атлант (РТЦ)","Тип цен":"Дилерская -7,5%","Баланс":"-281 678,53"}';

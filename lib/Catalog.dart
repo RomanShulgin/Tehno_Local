@@ -272,8 +272,7 @@ class itemGroupState extends State<itemGroup> {
   var data;
 
   void redraw() {
-    var statescaffold =
-        context.ancestorStateOfType(TypeMatcher<InfoScreenState>());
+    var statescaffold = context.findAncestorStateOfType<InfoScreenState>();
     if (statescaffold != null) {
       statescaffold.setState(() {});
       print('перерисовываем корзинку');

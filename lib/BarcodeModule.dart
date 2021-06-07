@@ -457,9 +457,9 @@ class BarDocState extends State {
         await post.HttpGet();
         var json = post.text;
         var res = getParam(json, "Найдено");
-        if (!res)
+        if (!res) {
           PopUpInfo('Штрихкод', barcode + ' в документе не найден!', context);
-        else {
+        } else {
           rescan = await dialogGoodsBar(
               getParam(json, "Данные")['Код'], data, renew, context);
           //print('Rescan ' + rescan.toString());
@@ -495,7 +495,8 @@ class BarDocState extends State {
   }
 
   void opennom(data) {
-    dialogGoodsCard(data['Код'], 'Coded', context);
+    //dialogGoodsCard(data['Код'], 'Coded', context);
+    dialogGoodsBar(data['Код'], data, renew, context);
   }
 
   void openmark(code, data) {
