@@ -420,6 +420,12 @@ class BarDocState extends State {
   Map struct;
   var data;
   bool rescan = false;
+  String search = '';
+  StreamController<Map> outData = StreamController<Map>.broadcast();
+
+  void dispose() {
+    outData.close();
+  }
 
   Future getdata() async {
     var post = new Post1c();
@@ -437,74 +443,18 @@ class BarDocState extends State {
     setState(() {});
   }
 
-  Future Scan() async {
-    var rescan = true;
-    while (rescan) {
-      rescan = false;
-      try {
-        String barcode = await BarcodeScanner.scan();
-        //PopUpInfo('Штрихкод', barcode, context);
+  Future addbarcode(code, barcode) async {
+    var post = new Post1c();
+    post.metod = "addbarcode";
+    post.input = '?code=' + code + '&barcode=' + barcode;
 
-        var post = new Post1c();
-        post.metod = "findbargoodindoc";
-        post.input = '?barcode=' +
-            barcode +
-            '&doctype=' +
-            data['Тип'] +
-            '&id=' +
-            data['Ид'];
-
-        await post.HttpGet();
-        var json = post.text;
-        var res = getParam(json, "Найдено");
-        if (!res) {
-          PopUpInfo('Штрихкод', barcode + ' в документе не найден!', context);
-        } else {
-          rescan = await dialogGoodsBar(
-              getParam(json, "Данные")['Код'], data, renew, context);
-          //print('Rescan ' + rescan.toString());
-        }
-        //isloading = false;
-
-        //setState(() => this.barcode = barcode);
-      } on PlatformException catch (e) {
-        if (e.code == BarcodeScanner.CameraAccessDenied) {
-          setState(() {
-            PopUpInfo('Ошибка сканера',
-                'The user did not grant the camera permission!', context);
-            //this.barcode = 'The user did not grant the camera permission!';
-          });
-        } else {
-          PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
-          //setState(() => this.barcode = 'Unknown error: $e');
-        }
-      } on FormatException {
-        /*setState(() => this.barcode =
-      'null (User returned using the "back"-button before scanning anything. Result)');*/
-      } catch (e) {
-        PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
-        //setState(() => this.barcode = 'Unknown error: $e');
-      }
-    }
+    await post.HttpGet();
+    PopUpInfo('Добавление баркода', post.state, context);
   }
 
-  void renew() {
-    setState(() {
-      isloading = true;
-    });
-  }
-
-  void opennom(data) {
-    //dialogGoodsCard(data['Код'], 'Coded', context);
-    dialogGoodsBar(data['Код'], data, renew, context);
-  }
-
-  void openmark(code, data) {
-    dialogMarks(code, data, renew, context);
-  }
-
-  List nomList(data) {
+  List SnomList(data, barcode, scansearch) {
     var bordersList = new List<TableRow>();
+    print('searching for ' + scansearch);
     bordersList.add(
         TableRow(decoration: BoxDecoration(color: Colors.amber[50]), children: [
       TableCell(
@@ -547,6 +497,282 @@ class BarDocState extends State {
     for (var doc in data['Товары']) {
       var markBcolor;
       var markcolor;
+      if (!doc['Номенклатура']
+              .toLowerCase()
+              .contains(scansearch.toLowerCase()) &&
+          scansearch.isNotEmpty) continue;
+      var color = (doc['Количество'] == doc['Подобрано'])
+          ? Colors.lightGreenAccent
+          : Colors.transparent;
+      if (doc['Количество'] == doc['Маркировано']) {
+        markBcolor = Colors.lightGreenAccent;
+        markcolor = Colors.black;
+      } else {
+        markBcolor = Colors.transparent;
+        if (doc['ЕстьМаркировки']) {
+          markcolor = Colors.black;
+          markBcolor = Colors.amberAccent;
+        } else
+          markcolor = Colors.grey[300];
+      }
+
+      bordersList.add(TableRow(children: [
+        TableCell(
+            child: InkWell(
+          child: ContColorSmall(
+              Column(
+                children: <Widget>[
+                  Text(doc['Код'], textScaleFactor: 0.8),
+                  Text(doc['Ячейка'])
+                ],
+              ),
+              color),
+          onTap: () {
+            addbarcode(doc['Код'], barcode);
+          },
+        )),
+        TableCell(
+            child: InkWell(
+          child: ContColorSmall(Text(doc['Номенклатура']), color),
+          onTap: () {
+            addbarcode(doc['Код'], barcode);
+          },
+        )),
+        TableCell(
+            child: InkWell(
+          child: ContColorSmall(
+              Column(
+                children: <Widget>[
+                  Text(doc['Количество'].toString()),
+                  Text(doc['Подобрано'].toString())
+                ],
+              ),
+              color),
+          onTap: () {
+            addbarcode(doc['Код'], barcode);
+          },
+        )),
+        (data['Тип'] == 'real')
+            ? TableCell(
+                child: InkWell(
+                child: ContColorSmall(
+                    Icon(
+                      CupertinoIcons.barcode,
+                      color: markcolor,
+                    ),
+                    markBcolor),
+                onTap: () {
+                  addbarcode(doc['Код'], barcode);
+                },
+              ))
+            : TableCell(
+                child: Container(),
+              ),
+      ]));
+    }
+    return bordersList;
+  }
+
+  Future<void> PopUpScan(barcode, context) {
+    var txtcont = new TextEditingController();
+    String scansearch = '';
+    txtcont.text = scansearch;
+    var colwid; // = new Map();
+    if (data['Тип'] == 'real') {
+      colwid = {
+        0: FlexColumnWidth(0.8),
+        1: FlexColumnWidth(1.4),
+        2: FlexColumnWidth(0.5),
+        3: FlexColumnWidth(0.5),
+      };
+    } else {
+      colwid = {
+        0: FlexColumnWidth(0.8),
+        1: FlexColumnWidth(1.4),
+        2: FlexColumnWidth(0.5),
+        3: FlexColumnWidth(0.01),
+      };
+    }
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Штрихкод' + barcode + ' в документе не найден!'),
+          content: Column(
+            children: <Widget>[
+              Group(
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: txtcont,
+                          //initialValue: search,
+                          obscureText: false,
+                          onEditingComplete: () {
+                            scansearch = txtcont.text;
+                            outData.sink.add(
+                                {'action': 'search', 'search': txtcont.text});
+                            FocusScope.of(context).unfocus();
+                            //isloading = true;
+                          },
+                          //keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      iconButton(Icon(Icons.cancel), () {
+                        scansearch = '';
+                        outData.sink.add({'action': 'search', 'search': ''});
+                      })
+                    ],
+                  ),
+                  "Поиск номенклатуры"),
+              Expanded(
+                  //height: 500.0,
+                  child: StreamBuilder(
+                      stream: outData.stream,
+                      builder:
+                          (BuildContext context, AsyncSnapshot<Map> snapshot) {
+                        if (snapshot.hasData)
+                          scansearch = snapshot.data['search'];
+                        return ListView(children: [
+                          Table(
+                            columnWidths: colwid,
+                            border: TableBorder.all(),
+                            children: SnomList(data, barcode, scansearch),
+                          ),
+                        ]);
+                      }))
+            ],
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Отмена'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future Scan() async {
+    var rescan = true;
+    while (rescan) {
+      rescan = false;
+      try {
+        String barcode = await BarcodeScanner.scan();
+        //PopUpInfo('Штрихкод', barcode, context);
+
+        var post = new Post1c();
+        post.metod = "findbargoodindoc";
+        post.input = '?barcode=' +
+            barcode +
+            '&doctype=' +
+            data['Тип'] +
+            '&id=' +
+            data['Ид'];
+
+        await post.HttpGet();
+        var json = post.text;
+        var res = getParam(json, "Найдено");
+        if (!res) {
+          PopUpScan(barcode, context);
+          //PopUpInfo('Штрихкод', barcode + ' в документе не найден!', context);
+        } else {
+          rescan = await dialogGoodsBar(
+              getParam(json, "Данные")['Код'], data, renew, context);
+          //print('Rescan ' + rescan.toString());
+        }
+        //isloading = false;
+
+        //setState(() => this.barcode = barcode);
+      } on PlatformException catch (e) {
+        if (e.code == BarcodeScanner.CameraAccessDenied) {
+          setState(() {
+            PopUpInfo('Ошибка сканера',
+                'The user did not grant the camera permission!', context);
+            //this.barcode = 'The user did not grant the camera permission!';
+          });
+        } else {
+          PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
+          //setState(() => this.barcode = 'Unknown error: $e');
+        }
+      } on FormatException {
+        /*setState(() => this.barcode =
+      'null (User returned using the "back"-button before scanning anything. Result)');*/
+      } catch (e) {
+        PopUpInfo('Ошибка сканера', 'Unknown error: $e', context);
+        //setState(() => this.barcode = 'Unknown error: $e');
+      }
+    }
+  }
+
+  void renew() {}
+
+  void opennom(info, [barcode = '']) {
+    //dialogGoodsCard(data['Код'], 'Coded', context);
+    dialogGoodsBar(info['Код'], data, renew, context);
+  }
+
+  void openmark(code, data) {
+    dialogMarks(code, data, renew, context);
+  }
+
+  List nomList(data) {
+    var bordersList = new List<TableRow>();
+    print('searching for ' + search);
+    bordersList.add(
+        TableRow(decoration: BoxDecoration(color: Colors.amber[50]), children: [
+      TableCell(
+          child: Column(children: [
+        Text(
+          'Код',
+          textScaleFactor: 1.0,
+        ),
+        Text(
+          'Ячейка',
+          textScaleFactor: 1.0,
+        )
+      ])),
+      TableCell(
+          child: Center(
+        child: Text(
+          'Номенклатура',
+          textScaleFactor: 1.0,
+        ),
+      )),
+      TableCell(
+          child: Column(
+        children: <Widget>[
+          Center(child: Text('Кол.', textScaleFactor: 1.0)),
+          Center(child: Text('Подб.', textScaleFactor: 1.0))
+        ],
+      )),
+      (data['Тип'] == 'real')
+          ? (TableCell(
+              child: Center(
+                  child: Text(
+                'Мар.',
+                textScaleFactor: 1.0,
+              )),
+            ))
+          : TableCell(
+              child: Container(),
+            ),
+    ]));
+    for (var doc in data['Товары']) {
+      var markBcolor;
+      var markcolor;
+      if (!doc['Номенклатура'].toLowerCase().contains(search.toLowerCase()) &&
+          search.isNotEmpty) continue;
       var color = (doc['Количество'] == doc['Подобрано'])
           ? Colors.lightGreenAccent
           : Colors.transparent;
@@ -620,6 +846,8 @@ class BarDocState extends State {
   }
 
   Widget docBody() {
+    var txtcont = new TextEditingController();
+    txtcont.text = search;
     if (isloading) {
       getdata();
       return LinearProgressIndicator();
@@ -649,6 +877,33 @@ class BarDocState extends State {
             Group(Check(data['Подобран'], 20.0), 'Подобран'),
           ]),
           Group(Text(data['Контрагент']), "Контрагент"),
+          Group(
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: txtcont,
+                      //initialValue: search,
+                      obscureText: false,
+                      onEditingComplete: () {
+                        setState(() {
+                          search = txtcont.text;
+                          FocusScope.of(context).unfocus();
+                          //isloading = true;
+                        });
+                      },
+                      //keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  iconButton(Icon(Icons.cancel), () {
+                    setState(() {
+                      search = '';
+                      //isloading = true;
+                    });
+                  })
+                ],
+              ),
+              "Поиск номенклатуры"),
           Expanded(
             //height: 500.0,
             child: ListView(children: [
@@ -760,31 +1015,31 @@ class GoodsBarState extends State<GoodsBar> {
 
   void addtsd(int col, data, {contscan = false}) async {
     int amount = data['Количество'] - data['Подобрано'];
-    if (col > amount) {
+    // if (col > amount) {
+    //   await PopUpInfo(
+    //       'Баркод', 'Количество подобранного больше необходимого', context);
+    // } else {
+    var post = new Post1c();
+    post.metod = "addposition";
+    post.input = '?doctype=' +
+        struct['Тип'] +
+        '&id=' +
+        struct['Ид'] +
+        '&code=' +
+        data['Код'] +
+        '&amount=' +
+        col.toString();
+    await post.HttpGet();
+    json = post.text;
+    //isloading = false;
+    if (getParam(json, 'Обработано'))
+      await PopUpInfo('Баркод', 'Обработано.', context);
+    else
       await PopUpInfo(
-          'Баркод', 'Количество подобранного больше необходимого', context);
-    } else {
-      var post = new Post1c();
-      post.metod = "addposition";
-      post.input = '?doctype=' +
-          struct['Тип'] +
-          '&id=' +
-          struct['Ид'] +
-          '&code=' +
-          data['Код'] +
-          '&amount=' +
-          col.toString();
-      await post.HttpGet();
-      json = post.text;
-      //isloading = false;
-      if (getParam(json, 'Обработано'))
-        await PopUpInfo('Баркод', 'Обработано.', context);
-      else
-        await PopUpInfo(
-            'Баркод', 'Обработать не удалось. Проверьте количество.', context);
+          'Баркод', 'Обработать не удалось. Проверьте количество.', context);
 
-      //setState(() {});
-    }
+    //setState(() {});
+    //}
     Navigator.of(context).pop(contscan);
   }
 
