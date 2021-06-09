@@ -715,7 +715,11 @@ class BarDocState extends State {
     }
   }
 
-  void renew() {}
+  void renew() {
+    setState(() {
+      isloading = true;
+    });
+  }
 
   void opennom(info, [barcode = '']) {
     //dialogGoodsCard(data['Код'], 'Coded', context);
