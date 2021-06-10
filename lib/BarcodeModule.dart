@@ -1078,7 +1078,12 @@ class GoodsBarState extends State<GoodsBar> {
                         children: cellList(data['Ячейка']),
                       ),
                       "Ячейки"),
-                  Group(Text(data['Количество'].toString()), "Количество"),
+                  Row(
+                    children: [
+                      Group(Text(data['Количество'].toString()), "Количество"),
+                      Group(Text(data['Наличие'].toString()), "Наличие"),
+                    ],
+                  ),
                   Group(Text(data['Подобрано'].toString()), "Подобрано"),
                   LGroup(
                       Column(
